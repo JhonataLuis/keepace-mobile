@@ -1,25 +1,81 @@
 import { StatusBar } from 'expo-status-bar';
 import { Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import LandingPage from './components/LandingPage';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
-export default function App() {
+//import LandingPage from './src/screens/LandingPage';
+import { AuthProvider, useAuth } from './src/services/AuthContext';
+import Login from './src/screens/Login';
+
+const Stack = createStackNavigator();
+
+function AppNavigator() {
+
+  const { user } = useAuth();
+
+  {/*if(loading) {
+    return false; // Ou um componente de loading
+  }*/}
+
   return (
     <SafeAreaView className="flex-1 bg-zinc-950 p-4">
-      <View className="mt-10">
-        <Text className="text-2xl font-bold text-white">KeePace Mobile</Text>
-        <Text className="text-zinc-400">Gerencie suas tarefas com segurança</Text>
-        <StatusBar style="auto" />
-      </View>
-      <View className="mt-6 p-4 bg-zinc-900 border border-zinc-800 rounded-2xl">
-        <Text className="text-blue-400 font-semibold">Tarefa Importante</Text>
-        <Text className="text-zinc-300 mt-1">Configurar a API do Spring Boot</Text>
-      </View>
 
       <StatusBar style='light' />
+      {/*<LandingPage/>*/}
 
-      <LandingPage/>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {!user ? (
+          // Rotas não autenticadas
+          <>
+          <Stack.Screen 
+           name="Login"
+           component={Login}
+           /*options={{ headerShown: false }}*/
+          />
+          {/*<Stack.Screen 
+           name="Registro"
+           component={Registro}
+           options={{ title: 'Cadastro' }}
+          />*/}
+          </>
+        ) : (
+          // Rotas autenticadas
+          <>
+            {/*<Stack.Screen 
+             name="Home"
+             component={Home}
+             options={{ title: 'Dashboard' }}
+            />
+            <Stack.Screen 
+             name="ListaTarefas"
+             component={ListaTarefas}
+             options={{ title: 'Minhas Tarefas' }}
+            />
+            <Stack.Screen 
+             name="CriarEditarTarefa"
+             component={CriarEditarTarefa}
+             options={{ title: 'Tarefa' }}
+            />
+            <Stack.Screen 
+             name="Perfil"
+             component={Perfil}
+             options={{ title: 'Meu Perfil' }}
+            />*/}
+          </>
+        )}
+      </Stack.Navigator>
     </SafeAreaView>
+  );
+}
+
+export default function App(){
+  return(
+    <AuthProvider>
+      <NavigationContainer>
+        <AppNavigator />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
 
