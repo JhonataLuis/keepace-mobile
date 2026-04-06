@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from './src/services/AuthContext';
 import Login from './src/screens/Login';
 import Home from './src/screens/Home';
 import ListaTarefas from './src/screens/ListaTarefas';
+import CriarEditarTarefa from './src/screens/CriarEditarTarefa';
 
 const Stack = createStackNavigator();
 
@@ -50,12 +51,12 @@ function AppNavigator() {
              component={ListaTarefas}
              options={{ title: 'Minhas Tarefas' }}
             />
-            {/*<Stack.Screen 
+            <Stack.Screen 
              name="CriarEditarTarefa"
              component={CriarEditarTarefa}
              options={{ title: 'Tarefa' }}
             />
-            <Stack.Screen 
+            {/*<Stack.Screen 
              name="Perfil"
              component={Perfil}
              options={{ title: 'Meu Perfil' }}
