@@ -4,9 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
+
 //import LandingPage from './src/screens/LandingPage';
 import { AuthProvider, useAuth } from './src/services/AuthContext';
 import Login from './src/screens/Login';
+import Home from './src/screens/Home';
+import ListaTarefas from './src/screens/ListaTarefas';
 
 const Stack = createStackNavigator();
 
@@ -19,11 +22,6 @@ function AppNavigator() {
   }*/}
 
   return (
-    <SafeAreaView className="flex-1 bg-zinc-950 p-4">
-
-      <StatusBar style='light' />
-      {/*<LandingPage/>*/}
-
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!user ? (
           // Rotas não autenticadas
@@ -47,12 +45,12 @@ function AppNavigator() {
              component={Home}
              options={{ title: 'Dashboard' }}
             />
-            {/*<Stack.Screen 
+            <Stack.Screen 
              name="ListaTarefas"
              component={ListaTarefas}
              options={{ title: 'Minhas Tarefas' }}
             />
-            <Stack.Screen 
+            {/*<Stack.Screen 
              name="CriarEditarTarefa"
              component={CriarEditarTarefa}
              options={{ title: 'Tarefa' }}
@@ -65,7 +63,6 @@ function AppNavigator() {
           </>
         )}
       </Stack.Navigator>
-    </SafeAreaView>
   );
 }
 
