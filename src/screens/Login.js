@@ -11,16 +11,26 @@ export default function Login({ navigation }) {
     const { login } = useAuth();
 
     const handleLogin = async () => {
+
+        console.log("1 Botão clicado!");
         if (!email || !password) {
             Alert.alert('Erro', 'Preencha todos os campos');
             return;
         }
 
-        const success = await login(email, password);
-        if (success) {
-            navigation.replace('Home');
-        } else {
-            Alert.alert('Erro', 'Email ou senha inválidos');
+        try {
+            console.log("2 Chamando função de login do Context...");
+            const success = await login(email, password);
+
+            console.log('3 Resultado do login:', success);
+
+            if(!success){
+                Alert.alert("Erro de Login", 'E-mail ou senha inválidos ou erro de conexão!')
+            }
+        } catch (error) {
+            console.error("Erro ao tentar logar:", error);
+            console.log("Erro crítico no handleLogin:", error);
+            Alert.alert('Erro', 'Ocorreu um erro inesperado.');
         }
     };
 

@@ -42,12 +42,12 @@ function AppNavigator() {
         ) : (
           // Rotas autenticadas
           <>
-            {/*<Stack.Screen 
+            <Stack.Screen 
              name="Home"
              component={Home}
              options={{ title: 'Dashboard' }}
             />
-            <Stack.Screen 
+            {/*<Stack.Screen 
              name="ListaTarefas"
              component={ListaTarefas}
              options={{ title: 'Minhas Tarefas' }}

@@ -1,5 +1,10 @@
 import React, { createContext , useState, useContext } from 'react';
 
+import api from './api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+
 const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
@@ -7,15 +12,30 @@ export const AuthProvider = ({ children }) => {
     const [isAuthenticate, setIsAuthenticate] = useState(false);
     const [user, setUser] = useState(null);
 
-    // Aqui depois você adicionará a lógica de login com o seu backend Java
+    // lógica de login com o seu backend Java
   const login = async (email, password) => {
     try {
-        if (email === "admin@admin.com" & password === "123"){
-            setUser({ email, name: 'Usuário Keepace' });
+        const response = await api.post('/auth/login', { email, password });
+
+        if(response.data && response.data.token) {
+
+            // backend devolve um objeto com { token e user }
+            const { token, ...userData } = response.data;
+
+            // salva o token para não precisar logar toda vez que abrir o app
+            await AsyncStorage.setItem('@KeePace:token', token);
+
+            // configura o token em todas as próximas requisições
+            api.defaults.headers.Authorization = `Bearer ${token}`;
+
+            setUser(userData);
+            setIsAuthenticate(true);
             return true;
         }
         return false;
     } catch (error) {
+        console.error("Erro na chamada da API:", error.response?.status, error.message);
+        console.error('Erro no login:', error.response?.data || error.message);
         return false;
     }
   };
