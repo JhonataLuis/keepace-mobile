@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import api from '../services/api' // Instância do Axios
 import { useAuth } from '../services/AuthContext';
 import { Feather } from '@expo/vector-icons';
 
 export default function ListaTarefas({ navigation }) {
-    
+    const insets = useSafeAreaInsets(); // Pega as medidas das bordas (notch e botões do sistema)
+
     const [tasks, setTasks] = useState([]);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
@@ -112,21 +113,29 @@ export default function ListaTarefas({ navigation }) {
     );
 
     return (
+        // SafeAreaView no topo garante que o Header não fique embaixo da câmera/relogio
+        <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
         <View className="flex-1 bg-gray-100">
-            <View className="p-4">
-                <TouchableOpacity className="bg-green-600 rounded-xl p-4 mb-4"
-                 onPress={() => navigation.navigate('CriarEditarTarefa')}
-                >
-                    <Text className="text-white text-center text-lg font-semibold">
-                        <Feather name="plus" size={25} color="white"/>
-                    </Text>
+            {/* Header fixo */}
+            <View className="bg-white pt-12 pb-4 px-6 flex-row justify-between items-center shadow-sm z-50">
+                <Text className="text-xl font-bold text-gray-800">Minhas Tarefas</Text>
+             <View className="flex-row">
+                <TouchableOpacity className="p-2 mr-2 bg-gray-100 rounded-full">
+                    <Feather name="search" size={20} color="#4b5563" />
                 </TouchableOpacity>
-
-                {tasks.length === 0 ? (
+                <TouchableOpacity className="p-2 bg-gray-100 rounded-full">
+                    <Feather name="more-vertical" size={20} color="#4b5563" />
+                </TouchableOpacity>
+            </View>
+            
+            </View>
+            {/* --- Conteúdo da Lista --- */}
+            <View className="flex-1 p-4">
+                {tasks.length === 0  ? (
                     <View className="items-center justify-center py-10">
                         <Text className="text-gray-500 text-center text-base">
                             Nenhuma tarefa ainda.{'\n'}
-                            Clique em "Nova Tarefa" para começar!
+                            Clique no "+" para começar!
                         </Text>
                     </View>
                 ) : (
@@ -134,6 +143,8 @@ export default function ListaTarefas({ navigation }) {
                         data={tasks}
                         renderItem={renderTask}
                         keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+                        contentContainerStyle={{ paddingTop: 16, paddingBottom: 150 }}
+                        
                         // SÓ CHAMA SE: não estiver carregando E se tiver mais dados
                         onEndReached={() => {
                             if (!loading && hasMore) {
@@ -148,7 +159,57 @@ export default function ListaTarefas({ navigation }) {
                     />
                 )}
             </View>
+            {/* -- Botão "+" (FAB) Flutuante -- */}
+            <TouchableOpacity
+             style={{ elevation: 8,
+                // Sombra para iOS
+                shadowColor:"#000",
+                shadowOffset: {
+                    width: 0,
+                    height: 4,
+                },
+                shadowOpacity: 0.30,
+                shadowRadius: 4.65,
+                // Posicionamento dinâmico
+                bottom: 80 + insets.bottom // Sobe botão conforme a barra do android
+              }} // Sombra no Android
+             className="absolute right-6 bg-green-600 w-16 h-16 rounded-full items-center justify-center shadow-lg z-50"
+             onPress={() => navigation.navigate('CriarEditarTarefa')}
+            >
+                <Feather name="plus" size={32} color="white"/>
+            </TouchableOpacity>
+
+            {/* --- Footer Fixo com 4 Botões --- */}
+            <View
+                 style={{ paddingBottom: insets.bottom > 0 ? insets.bottom : 15, // Se não tiver barra (gestos), usa 15px
+                    height: 70 + (insets.bottom > 0 ? insets.bottom : 0)
+                 }}
+                 className="absolute bottom-0 w-full bg-white flex-row justify-around items-center py-4 border-t border-gray-200 shadow-xl">
+                <TouchableOpacity
+                 className="items-center" onPress={() => navigation.navigate('Home')}>
+                    <Feather name="home" size={24} color="#9ca3af" />
+                    <Text className="text-[10px] text-gray-500">Inicio</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity className="items-center">
+                    <Feather name="list" size={24} color="#16a34a"/>
+                    <Text className="text-[10px] text-green-600">Tarefas</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity className="items-center">
+                    <Feather name='calendar' size={24} color="#9ca3af" />
+                    <Text className="text-[10px] text-gray-500">Agenda</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                 className="items-center">
+                    <Feather name='user' size={24} color="#9ca3af" />
+                    <Text className="text-[10px] text-gray-500">Perfil</Text>
+                </TouchableOpacity>
+                
+            </View>
         </View>
+        </SafeAreaView>
     );
 }
 

@@ -74,7 +74,7 @@ export default function Home({ navigation }) {
 
                     {/* Menu rápido */}
                     <Text className="text-xl font-bold text-gray-800 mb-4">
-                        Ações Rápidas
+                        Ações rápidas
                     </Text>
 
                     <TouchableOpacity 
