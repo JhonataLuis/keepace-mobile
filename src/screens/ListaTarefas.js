@@ -12,6 +12,7 @@ export default function ListaTarefas({ navigation }) {
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
+    const [menuVisible, setMenuVisible] = useState(false);
     const { user } = useAuth();
 
     useEffect(() => {
@@ -33,10 +34,13 @@ export default function ListaTarefas({ navigation }) {
         const isLast = response.data?.last ?? true;
 
         setTasks(prev => {
-            if (isFirstLoad) return newTasks;
+            // Filtra para pegar apenas o que não está concluído da resposta da API
+            const pendentes = newTasks.filter(task => task.concluido === false);
 
-            // FILTRO DE SEGURANÇA: Só adiciona se o ID não existir no array anterior
-            const filteredNewTasks = newTasks.filter(
+            if (isFirstLoad) return pendentes;
+
+            // FILTRO DE SEGURANÇA: Só adiciona se o ID não existir no array anterior (Filtra duplicados)
+            const filteredNewTasks = pendentes.filter(
                 newTask => !prev.some(prevTask => prevTask.id === newTask.id)
             );
             return [...prev, ...filteredNewTasks];
@@ -54,9 +58,14 @@ export default function ListaTarefas({ navigation }) {
     const toggleComplete = async (task) => {
         try {
             // Inverte o status e envia para o backend via PUT ou PATCH
-            const updatedTask = { ...task, completed: !task.completed };
+            const updatedTask = { ...task, concluido: !task.concluido };
+
             await api.put(`/tasks/tarefas/${task.id}/concluir`, updatedTask);
-            carregarTasks(true); // Recarrega apenas a primeira pagina para atualizar o status da tela
+
+            // Remove a tarefa da lista localmente (já que ela está concluida)
+            setTasks(prev => prev.filter(t => t.id !== task.id));
+            //carregarTasks(true); // Recarrega apenas a primeira pagina para atualizar o status da tela
+            Alert.alert('Sucesso', 'Tarefa concluída!');
         } catch (error) {
             Alert.alert('Erro', 'Não foi possível atualizar a tarefa.');
         }
@@ -77,7 +86,7 @@ export default function ListaTarefas({ navigation }) {
                             color={item.concluido ? "#9ca3af" : "#16a34a"}
                             className="mr-2"
                             />
-                        <Text className={`text-lg fong-semibold ${item.concluido ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                        <Text className={`text-lg font-semibold ${item.concluido ? 'line-through text-gray-400' : 'text-gray-800'}`}>
                             {item.titulo}
                         </Text>
                     </TouchableOpacity>
@@ -114,18 +123,81 @@ export default function ListaTarefas({ navigation }) {
 
     return (
         // SafeAreaView no topo garante que o Header não fique embaixo da câmera/relogio
-        <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
+        <SafeAreaView className="flex-1 bg-white" edges={['top']}>
         <View className="flex-1 bg-gray-100">
             {/* Header fixo */}
             <View className="bg-white pt-12 pb-4 px-6 flex-row justify-between items-center shadow-sm z-50">
                 <Text className="text-xl font-bold text-gray-800">Minhas Tarefas</Text>
              <View className="flex-row">
                 <TouchableOpacity className="p-2 mr-2 bg-gray-100 rounded-full">
-                    <Feather name="search" size={20} color="#4b5563" />
+                    <Feather name="list" size={20} color="#4b5563" />
                 </TouchableOpacity>
-                <TouchableOpacity className="p-2 bg-gray-100 rounded-full">
-                    <Feather name="more-vertical" size={20} color="#4b5563" />
-                </TouchableOpacity>
+
+                {/* Container do Menu */}
+                <View>
+                    <TouchableOpacity 
+                        className="p-2 bg-gray-100 rounded-full"
+                        onPress={() => setMenuVisible(!menuVisible)}
+                        >
+                        <Feather name="more-vertical" size={20} color="#4b5563" />
+                    </TouchableOpacity>
+                    {/* Dropdown Menu */}
+                    {menuVisible && (
+                        <>
+                            {/* Backdrop: Fecha o menu se clicar fora dele */}
+                            <TouchableOpacity
+                             activeOpacity={1}
+                             style={{ 
+                                position: 'absolute',
+                                top: -100,
+                                right: -100,
+                                width: 1000,
+                                height:2000,
+                                backgroundColor: 'transparent'
+                             }}
+                             onPress={() => setMenuVisible(false)}
+                            />
+                            {/* Caixa do Menu */}
+                                <View 
+                                 style={{ 
+                                    elevation: 10,
+                                    shadowColor: '#000', 
+                                    shadowOpacity: 0.2, 
+                                    shadowRadius: 10,
+                                    position: 'absolute',
+                                    right: -20,
+                                    top: 45,
+                                    width: 325,
+                                    zIndex: 999
+                                }}
+                                 className="bg-white rounded-xl border border-gray-100 overflow-hidden"
+                                >
+                                    <TouchableOpacity 
+                                        className="flex-row items-center p-4 border-b border-gray-50 active:bg-gray-50"
+                                        onPress={() => {
+                                            setMenuVisible(false);
+                                            carregarTasks(true); // Exemplo de ação
+                                        }}
+                                    >
+                                        <Feather name="refresh-cw" size={16} color="#4b5563" />
+                                        <Text className="ml-3 text-gray-700">Atualizar</Text>
+                                    </TouchableOpacity>
+
+                                        <TouchableOpacity 
+                                            className="flex-row items-center p-4 active:bg-gray-50"
+                                            onPress={() => {
+                                                setMenuVisible(false);
+                                                navigation.navigate('TarefasConcluidas');
+                                            }}
+                                        >
+                                            <Feather name="check-square" size={16} color="#4b5563" />
+                                            <Text className="ml-3 text-gray-700">Registro de Atividades</Text>
+                                        </TouchableOpacity>
+                                </View>
+                        </>
+                    )}
+                </View>
+
             </View>
             
             </View>

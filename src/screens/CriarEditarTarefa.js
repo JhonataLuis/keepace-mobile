@@ -60,7 +60,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
     };
 
     return (
-        <View className="flex-1 bg-gray-100 p-6 justify-center">
+        <View className="flex-1 bg-white justify-center">
             <View className="bg-white ronded-3xl p-6 shadow-xl">
                 <Text className="text-2xl font-bold text-gray-800 mb-6 text-center">
                     {existingTask ? 'Editar Tarefa' : 'Nova Tarefa'}
