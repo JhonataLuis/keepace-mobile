@@ -11,6 +11,7 @@ import Login from './src/screens/Login';
 import Home from './src/screens/Home';
 import ListaTarefas from './src/screens/ListaTarefas';
 import CriarEditarTarefa from './src/screens/CriarEditarTarefa';
+import TarefasConcluidas from './src/screens/TarefasConcluidas';
 
 const Stack = createStackNavigator();
 
@@ -55,6 +56,11 @@ function AppNavigator() {
              name="CriarEditarTarefa"
              component={CriarEditarTarefa}
              options={{ title: 'Tarefa' }}
+            />
+            <Stack.Screen
+             name='TarefasConcluidas'
+             component={TarefasConcluidas}
+             options={{ headerShown: false }}
             />
             {/*<Stack.Screen 
              name="Perfil"

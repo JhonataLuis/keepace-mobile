@@ -12,8 +12,10 @@ export default function CriarEditarTarefa({ navigation, route }) {
     const [titulo, setTitulo] = useState(existingTask?.titulo || '');
     const [descricao, setDescricao] = useState(existingTask?.descricao || '');
     const [categoria, setCategoria] = useState(existingTask?.categoria || 'PESSOAL');
+    const [prioridade, setPrioridade] = useState(existingTask?.prioridade || '');
     const [status, setStatus] = useState(existingTask?.status || 'TODO'); // Inicia com o STATUS A Fazer
     const [dueDate, setDueDate] = useState(existingTask?.dueDate || new Date().toISOString().split('T')[0]);
+    const [updatedAt, setUpdatedAt] = useState(existingTask?.updatedAt || new Date().toISOString());
     const [loading, setLoading] = useState(false);
 
     const saveTask = async () => {
@@ -29,13 +31,22 @@ export default function CriarEditarTarefa({ navigation, route }) {
             // Se o dueDate for "2026-12-31", vira "2026-12-31T00:00:00"
             const formattedDateTime = `${dueDate}T00:00:00`;
 
+            // Verifica se status é concluído para inserir a dataConclusao
+            const isDone = status === 'DONE';
+
+            // Atualiza tarefas/ cria tarefas
             const taskData = {
                 titulo: titulo.trim(),
                 descricao: descricao.trim(),
                 categoria: categoria,
+                prioridade: prioridade,
                 status: status,
                 dueDate: formattedDateTime, // Formato para LocalDateTime Spring Boot do Java
-                // O concluido o Java seta como default no POST (Backend)
+                // Verifica se for DONE, envia data atual, senão null
+                concluido: isDone,
+                dataConclusao: isDone ? new Date().toISOString() : null,
+                updatedAt: updatedAt
+               
             };
 
             if (existingTask) {
@@ -108,7 +119,17 @@ export default function CriarEditarTarefa({ navigation, route }) {
                  numberOfLines={4}
                  textAlignVertical='top'
                 />
-
+                <Text className="text-gray-600 font-medium mb-2 ml-1">Prioridade</Text>
+                <View className="bg-gray-50 border border-gray-200 rounded-2xl mb-4 overflow-hidden">
+                    <Picker
+                     selectedValue={prioridade}
+                     onValueChange={(itemValue) => setPrioridade(itemValue)}
+                    >
+                        <Picker.Item label='Baixa' value="Baixa"/>
+                        <Picker.Item label='Média' value="Media"/>
+                        <Picker.Item label='Alta' value="Alta"/>
+                    </Picker>
+                </View>
                 <Text>Prazo de Entrega</Text>
                 <TextInput
                  className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-1 text-base"

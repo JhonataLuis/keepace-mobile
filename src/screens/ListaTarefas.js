@@ -61,6 +61,7 @@ export default function ListaTarefas({ navigation }) {
             const updatedTask = { ...task, concluido: !task.concluido };
 
             await api.put(`/tasks/tarefas/${task.id}/concluir`, updatedTask);
+            console.log("Editando tarefa : ", updatedTask);
 
             // Remove a tarefa da lista localmente (já que ela está concluida)
             setTasks(prev => prev.filter(t => t.id !== task.id));
@@ -103,6 +104,9 @@ export default function ListaTarefas({ navigation }) {
                         <View className="flex-row mt-2 ml-7">
                             <Text className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
                                 {item.categoria}
+                            </Text>
+                             <Text className="text-[10px] bg-gray-100 text-cyan-500 px-2 py-0.5 rounded">
+                                {item.prioridade}
                             </Text>
                         </View>
                     )}
@@ -179,8 +183,19 @@ export default function ListaTarefas({ navigation }) {
                                             carregarTasks(true); // Exemplo de ação
                                         }}
                                     >
-                                        <Feather name="refresh-cw" size={16} color="#4b5563" />
-                                        <Text className="ml-3 text-gray-700">Atualizar</Text>
+                                        <Feather name="mail" size={16} color="#4b5563" />
+                                        <Text className="ml-3 text-gray-700">Enviar por e-mail</Text>
+                                    </TouchableOpacity>
+
+                                     <TouchableOpacity 
+                                        className="flex-row items-center p-4 border-b border-gray-50 active:bg-gray-50"
+                                        onPress={() => {
+                                            setMenuVisible(false);
+                                            carregarTasks(true); // Exemplo de ação
+                                        }}
+                                    >
+                                        <Feather name="message-square" size={16} color="#4b5563" />
+                                        <Text className="ml-3 text-gray-700">Comentários</Text>
                                     </TouchableOpacity>
 
                                         <TouchableOpacity 
