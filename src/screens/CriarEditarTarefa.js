@@ -128,6 +128,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
                         <Picker.Item label='Baixa' value="Baixa"/>
                         <Picker.Item label='Média' value="Media"/>
                         <Picker.Item label='Alta' value="Alta"/>
+                        <Picker.Item label='Urgente' value="Urgente"/>
                     </Picker>
                 </View>
                 <Text>Prazo de Entrega</Text>

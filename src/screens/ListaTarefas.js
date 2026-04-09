@@ -16,42 +16,58 @@ export default function ListaTarefas({ navigation }) {
     const { user } = useAuth();
 
     useEffect(() => {
-        carregarTasks();
-        const unsubscribe = navigation.addListener('focus', carregarTasks);
+        // Carrega a primeira vez que o componente monta
+        carregarTasks(true);
+        const unsubscribe = navigation.addListener('focus', () => {
+            // Ao ganhar foco, força o carregamento da primeira página
+            carregarTasks(true);
+        });
         return unsubscribe;
     }, [navigation]);
 
+    // Ação para mudar as cores do card da tarefa conforme a prioridade
+    const prioridadeCores = {
+      'BAIXA': { border: 'border-white', text: '#374151', check: '#d1d5db' }, // Branco/Cinza claro
+      'MEDIA': { border: 'border-blue-500', text: '#3b82f6', check: '#3b82f6' }, // Azul
+      'ALTA': { border: 'border-orange-500', text: '#f97316', check: '#f97316'}, // Laranja
+      'URGENTE': { border: 'border-red-600', text: '#dc2626', check: '#dc2626'}, // Vermelho
+    };
+
     const carregarTasks = async (isFirstLoad = false) => {
-    if (loading) return;
+        if (loading) return;
     
-    try {
-        setLoading(true);
-        const currentPage = isFirstLoad ? 0 : page;
+        try {
+            setLoading(true);
+            const currentPage = isFirstLoad ? 0 : page;
 
-        const response = await api.get(`/tasks/tarefas/paginadas?page=${currentPage}&size=12`);
-        console.log("CONTEÚDO DA API:", JSON.stringify(response.data.content, null, 2));
-        const newTasks = response.data?.content || [];
-        const isLast = response.data?.last ?? true;
+            const response = await api.get(`/tasks/tarefas/paginadas?page=${currentPage}&size=12&concluido=false`);
+            console.log("CONTEÚDO DA API:", JSON.stringify(response.data.content, null, 2));
+            
+            const newTasks = response.data?.content || [];
+            const isLast = response.data?.last ?? true;
 
-        setTasks(prev => {
             // Filtra para pegar apenas o que não está concluído da resposta da API
-            const pendentes = newTasks.filter(task => task.concluido === false);
+                const pendentes = newTasks.filter(task => task.concluido === false);
 
-            if (isFirstLoad) return pendentes;
+            setTasks(prev => {
 
-            // FILTRO DE SEGURANÇA: Só adiciona se o ID não existir no array anterior (Filtra duplicados)
-            const filteredNewTasks = pendentes.filter(
-                newTask => !prev.some(prevTask => prevTask.id === newTask.id)
-            );
-            return [...prev, ...filteredNewTasks];
-        });
+                if (isFirstLoad) {
+                    return pendentes; // Substitui a lista inteira
+                }
 
-        setHasMore(!isLast);
-        setPage(isFirstLoad ? 1 : currentPage + 1);
-    } catch (error) {
-        console.error('Erro:', error);
-    } finally {
-        setLoading(false);
+                // FILTRO DE SEGURANÇA: Só adiciona se o ID não existir no array anterior (Filtra duplicados)
+                const filteredNewTasks = pendentes.filter(
+                    newTask => !prev.some(prevTask => prevTask.id === newTask.id)
+                );
+                return [...prev, ...filteredNewTasks];
+            });
+
+            setHasMore(!isLast);
+            setPage(isFirstLoad ? 1 : currentPage + 1); // Atualiza para a próxima pagina
+        } catch (error) {
+            console.error('Erro ao carregar tarefas:', error);
+        } finally {
+            setLoading(false);
     }
 };
 
@@ -72,8 +88,17 @@ export default function ListaTarefas({ navigation }) {
         }
     };
 
-    const renderTask = ({ item }) => (
-        <View className={`bg-white rounded-xl p-4 mb-3 shadow-sm border-l-4 ${item.concluido ? 'border-gry-300' : 'border-green-500'}`}>
+    const renderTask = ({ item }) => {
+
+        const chavePrioridade = item.prioridade?.toUpperCase() || 'BAIXA';
+        // Fallback para 'BAIXA' se o valor for nulo ou diferente
+        const estiloPrioridade = prioridadeCores[chavePrioridade] || prioridadeCores['BAIXA'];
+        
+
+        return (
+        <View 
+            style={{ borderLeftColor: item.concluido ? '#d1d5db' : estiloPrioridade.check }}
+            className="bg-white rounded-xl p-4 mb-3 shadow-sm border-l-4">
             <View className="flex-row justify-between items-start">
                 <View className="flex-1 mr-3">
                     {/* Botão para concluir (Clique no texto ou ícone) */}
@@ -81,33 +106,49 @@ export default function ListaTarefas({ navigation }) {
                         onPress={() => toggleComplete(item)}
                         className="flex-row items-center"
                         >
-                            {/* Ícone de Checkbox dinâmico  */}
+                            {/* Ícone de Checkbox com cor dinâmico  */}
                             <Feather name={item.concluido ? "check-circle" : "circle"}
-                            size={20}
-                            color={item.concluido ? "#9ca3af" : "#16a34a"}
-                            className="mr-2"
+                                size={20}
+                                color={item.concluido ? "#9ca3af" : estiloPrioridade.check}
+                                className="mr-2"
                             />
                         <Text className={`text-lg font-semibold ${item.concluido ? 'line-through text-gray-400' : 'text-gray-800'}`}>
                             {item.titulo}
                         </Text>
                     </TouchableOpacity>
-                    {item.descricao ? (
+                    {item.descricao && (
                         <Text 
-                         numberOfLines={2} // Limita a 3 linhas
-                         ellipsizeMode='tail' // Adiciona o "..." no final
-                         className={`text-sm mt-1 ml-7 ${item.concluido ? 'text-gray-400' : 'text-gray-600'}`}>
+                            numberOfLines={1} // Limita a 3 linhas
+                            ellipsizeMode='tail' // Adiciona o "..." no final
+                            className={`text-sm mt-1 ml-7 ${item.concluido ? 'text-gray-400' : 'text-gray-600'}`}>
                             {item.descricao}
                         </Text>
-                    ) : null}
+                    )}
+
                     {/* Badge de Categoria/Prioridade */}
                     {!item.concluido && (
-                        <View className="flex-row mt-2 ml-7">
-                            <Text className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
+                        <View className="flex-row mt-2 ml-7 items-center">
+                            <Text className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded mr-2">
                                 {item.categoria}
                             </Text>
-                             <Text className="text-[10px] bg-gray-100 text-cyan-500 px-2 py-0.5 rounded">
-                                {item.prioridade}
+
+                            {/* Prioridade com cor de texto dinâmica */}
+                            <View className="flex-row items-center bg-gray-100 px-2 py-0.5 rounded mr-2">
+                                <View 
+                                    style={{ backgroundColor: estiloPrioridade.check }}
+                                        className="w-2 h-2 rounded-full mr-1"
+                                    />
+                                 <Text 
+                                    style={{ color: estiloPrioridade.text }}
+                                    className="text-[10px] font-bold">
+                                {chavePrioridade}
                             </Text>
+                            </View>
+                            <View className="bg-gray-100 px-2 py-0.5 rounded">
+                                <Text className="text-[10px] text-blue-500">
+                                    {item.dueDate}
+                                </Text>
+                            </View>
                         </View>
                     )}
                 </View>
@@ -123,7 +164,8 @@ export default function ListaTarefas({ navigation }) {
                 </View>
             </View>
         </View>
-    );
+        );
+};
 
     return (
         // SafeAreaView no topo garante que o Header não fique embaixo da câmera/relogio
@@ -131,18 +173,18 @@ export default function ListaTarefas({ navigation }) {
         <View className="flex-1 bg-gray-100">
             {/* Header fixo */}
             <View className="bg-white pt-12 pb-4 px-6 flex-row justify-between items-center shadow-sm z-50">
-                <Text className="text-xl font-bold text-gray-800">Minhas Tarefas</Text>
-             <View className="flex-row">
-                <TouchableOpacity className="p-2 mr-2 bg-gray-100 rounded-full">
-                    <Feather name="list" size={20} color="#4b5563" />
-                </TouchableOpacity>
+                    <Text className="text-xl font-bold text-gray-800">Minhas Tarefas</Text>
+                <View className="flex-row">
+                    <TouchableOpacity className="p-2 mr-2 bg-gray-100 rounded-full">
+                        <Feather name="list" size={20} color="#4b5563" />
+                    </TouchableOpacity>
 
-                {/* Container do Menu */}
-                <View>
-                    <TouchableOpacity 
-                        className="p-2 bg-gray-100 rounded-full"
-                        onPress={() => setMenuVisible(!menuVisible)}
-                        >
+                    {/* Container do Menu */}
+                    <View>
+                        <TouchableOpacity 
+                            className="p-2 bg-gray-100 rounded-full"
+                            onPress={() => setMenuVisible(!menuVisible)}
+                            >
                         <Feather name="more-vertical" size={20} color="#4b5563" />
                     </TouchableOpacity>
                     {/* Dropdown Menu */}
@@ -209,11 +251,11 @@ export default function ListaTarefas({ navigation }) {
                                             <Text className="ml-3 text-gray-700">Registro de Atividades</Text>
                                         </TouchableOpacity>
                                 </View>
-                        </>
-                    )}
-                </View>
+                            </>
+                        )}
+                    </View>
 
-            </View>
+                </View>
             
             </View>
             {/* --- Conteúdo da Lista --- */}
@@ -297,8 +339,8 @@ export default function ListaTarefas({ navigation }) {
                     <Text className="text-[10px] text-gray-500">Perfil</Text>
                 </TouchableOpacity>
                 
+                </View>
             </View>
-        </View>
         </SafeAreaView>
     );
 }

@@ -36,13 +36,13 @@ export default function Perfil({ navigation }) {
                             {user?.profilePhoto ? (
                                 <Image
                                  source={{ uri: `${BASE_URL}${user.profilePhoto}?t=${new Date().getTime()}` }}
-                                 className="w-full h-full"
+                                 className="w-full h-full rounded-full"
                                  resizeMode='cover'
                                 />
                             ) : (
 
                                 <Text className="text-white text-3xl font-bold">
-                                    {user?.name || 'U'}
+                                    {user?.name?.charAt(0).toUpperCase() || 'U'}
                                 </Text>
                             )}
 
