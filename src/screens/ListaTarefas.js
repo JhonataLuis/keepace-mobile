@@ -273,7 +273,8 @@ export default function ListaTarefas({ navigation }) {
                  }}
                  className="absolute bottom-0 w-full bg-white flex-row justify-around items-center py-4 border-t border-gray-200 shadow-xl">
                 <TouchableOpacity
-                 className="items-center" onPress={() => navigation.navigate('Home')}>
+                  className="items-center" 
+                  onPress={() => navigation.navigate('Home')}>
                     <Feather name="home" size={24} color="#9ca3af" />
                     <Text className="text-[10px] text-gray-500">Inicio</Text>
                 </TouchableOpacity>
@@ -289,7 +290,9 @@ export default function ListaTarefas({ navigation }) {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                 className="items-center">
+                  className="items-center"
+                  onPress={() => navigation.navigate('Perfil')}
+                 >
                     <Feather name='user' size={24} color="#9ca3af" />
                     <Text className="text-[10px] text-gray-500">Perfil</Text>
                 </TouchableOpacity>

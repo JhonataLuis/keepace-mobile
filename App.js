@@ -12,6 +12,7 @@ import Home from './src/screens/Home';
 import ListaTarefas from './src/screens/ListaTarefas';
 import CriarEditarTarefa from './src/screens/CriarEditarTarefa';
 import TarefasConcluidas from './src/screens/TarefasConcluidas';
+import MyPerfil from './src/screens/MyPerfil';
 
 const Stack = createStackNavigator();
 
@@ -62,11 +63,11 @@ function AppNavigator() {
              component={TarefasConcluidas}
              options={{ headerShown: false }}
             />
-            {/*<Stack.Screen 
+            <Stack.Screen 
              name="Perfil"
-             component={Perfil}
+             component={MyPerfil}
              options={{ title: 'Meu Perfil' }}
-            />*/}
+            />
           </>
         )}
       </Stack.Navigator>

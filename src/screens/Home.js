@@ -92,7 +92,10 @@ export default function Home({ navigation }) {
                         <Feather name='plus' size={25} color="white"/>
                     </TouchableOpacity>
 
-                    <TouchableOpacity className="bg-purple-600 rounded-xl p-4 mb-4 flex-row justify-between items-center">
+                    <TouchableOpacity 
+                        className="bg-purple-600 rounded-xl p-4 mb-4 flex-row justify-between items-center"
+                        onPress={() => navigation.navigate('Perfil')}
+                        >
                         <Text className="text-white text-lg font-semibold">Meu Perfil</Text>
                         <Feather name='user' size={25} color="white" />
                     </TouchableOpacity>
