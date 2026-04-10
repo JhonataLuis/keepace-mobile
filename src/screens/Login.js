@@ -119,7 +119,7 @@ export default function Login({ navigation }) {
                 {/* Link Criar conta */}
                 <View className="flex-row justify-center mb-10">
                     <Text className="text-gray-500">Novo por aqui? </Text>
-                    <TouchableOpacity onPress={() => navigation.navigate('Registro')}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Register')}>
                         <Text className="text-blue-600 font-bold">Crie sua conta</Text>
                     </TouchableOpacity>
                 </View>

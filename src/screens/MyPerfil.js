@@ -10,7 +10,7 @@ export default function Perfil({ navigation }) {
     const BASE_URL = "http://192.168.5.115:8080";
 
     console.log("Perfil:", user);
-    console.log("Nome USER:", user.name);
+    console.log("Nome USER:", user?.name);
 
     const MenuOption = ({ icon, title, subtitle, onPress, color = "text-gray-700", isLast = false }) => (
         <TouchableOpacity
@@ -115,15 +115,15 @@ export default function Perfil({ navigation }) {
                 {/* Botão de Sair */}
                 <View className="px-6 mb-12">
                     <TouchableOpacity
-                     onPress={logout}
-                     className="bg-red-50 flex-row items-center justify-center p-4 rounded-2xl border border-red-100"
+                        onPress={logout}
+                        className="bg-red-50 flex-row items-center justify-center p-4 rounded-2xl border border-red-100"
                     >
                         <Feather name='log-out' size={20} color="#ef4444" />
                         <Text className="ml-2 text-red-500 font-bold text-lg">Sair da Conta</Text>
                     </TouchableOpacity>
-                    <Text className="text-center text-gray-300 text-xs mt-6">
-                        KeePace v1.0.0
-                    </Text>
+                        <Text className="text-center text-gray-300 text-xs mt-6">
+                            KeePace v1.0.0
+                        </Text>
                 </View>
             </ScrollView>
         </SafeAreaView>
