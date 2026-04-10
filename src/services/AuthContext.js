@@ -40,9 +40,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticate(false);
+  const logout = async () => {
+    try {
+        await AsyncStorage.removeItem('@KeePace:token');
+        setUser(null); // Isso fará o AppNavigator voltar automaticamente para a tela de login
+        setIsAuthenticate(false);
+    } catch (error) {
+        console.log("Erro ao deslogar: ", error);
+    }
   };
 
   return(

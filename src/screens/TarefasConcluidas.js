@@ -94,9 +94,17 @@ export default function TarefasConcluidas({ navigation }) {
                      keyExtractor={(item) => item.id.toString()}
                      renderItem={renderItem}
                      ListEmptyComponent={
-                        <Text className="text-center text-gray-500 mt-10">Nenhuma tarefa concluída encontrada.</Text>
+                        // Container estilizado para a lista vazia
+                        <View className="items-center justify-center mt-20 px-10">
+                            <View className="bg-green-50 p-6 rounded-full mb-4">
+                                <Feather name='check-circle' size={80} color="#16a34a" />
+                            </View>
+                             <Text className="text-xl font-bold text-gray-800 text-center">Tudo limpo por aqui!</Text>
+                             <Text className="text-gray-500 text-center mt-2">Você ainda não possui nenhuma tarefa concluída. Que tal finalizar algo hoje?</Text>
+                        </View>
+                       
                      }
-                     contentContainerStyle={{ paddingBottom: 20}}
+                     contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
                     />
                 )}
             </View>

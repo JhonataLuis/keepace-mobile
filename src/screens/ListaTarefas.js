@@ -260,11 +260,18 @@ export default function ListaTarefas({ navigation }) {
             </View>
             {/* --- Conteúdo da Lista --- */}
             <View className="flex-1 p-4">
-                {tasks.length === 0  ? (
-                    <View className="items-center justify-center py-10">
-                        <Text className="text-gray-500 text-center text-base">
-                            Nenhuma tarefa ainda.{'\n'}
-                            Clique no "+" para começar!
+                {tasks.length === 0 && !loading ? (
+                    // View centralizada para estado vazio
+                    <View className="flex-1 items-center justify-center pb-20">
+                        <View className="bg-blue-50 p-8 rounded-full mb-6">
+                            <Feather name='clipboard' size={70} color="#3b82f6" />
+                        </View>
+                        <Text className="text-2xl font-bold text-gray-800 mb-2">
+                            Sua lista está vazia
+                        </Text>
+                        <Text>
+                            Organize seu dia agora mesmo.{'\n'}
+                            Toque no botão <Text className="font-bold text-blue-500"> + </Text>
                         </Text>
                     </View>
                 ) : (
@@ -283,7 +290,11 @@ export default function ListaTarefas({ navigation }) {
                         }}
                         onEndReachedThreshold={0.1} // 0.1 é mais seguro que 0.5 para evitar loops
                         ListFooterComponent={() => (
-                            loading ? <ActivityIndicator size="large" color="#16a34a" /> : null
+                            loading ? (
+                                <View className="py-4">
+                                    <ActivityIndicator size="large" color="#16a34a" />    
+                                </View>
+                            ) : null
                         )}
                     />
                 )}

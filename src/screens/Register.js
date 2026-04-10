@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message'; // Para mensagens de alert mais estilizadas
 import api from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Register({ navigation }) {
 
@@ -14,6 +15,13 @@ export default function Register({ navigation }) {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+        const clearToken = async () => {
+            await AsyncStorage.removeItem('@KeePace:token');
+        };
+        clearToken();
+    }, []);
+
     // Valida se é um formato de email o digitado
     const validateEmail = (email) => {
         const re = /\S+@\S+\.\S+/;
@@ -22,8 +30,8 @@ export default function Register({ navigation }) {
 
     // Regex para usuário digitar senha em um padrão com mais segurança
     const validatePassword = (password) => {
-        // Pelo menos 8 caracteres, uma letra, um número e um caractere especial
-        const re = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+        // Pelo menos 8 caracteres, 1 letra, 1 número e 1 caractere especial
+        const re = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&.]).{8,}$/;
         return re.test(password);
     };
 
@@ -83,6 +91,8 @@ export default function Register({ navigation }) {
                     name: userName,
                     email: email,
                     password: password
+                }, {
+                    headers: { Authorization: ''} // Remove o token apenas nesta chamada
                 });
 
                 // Mensagem estilizada para o usuário após o sucesso do cadastro
@@ -131,7 +141,7 @@ export default function Register({ navigation }) {
             </View>
 
             <View className="px-8 pt-8">
-                <Text className="text-3xl font-bold text-gray-800">Criar Conta</Text>
+                <Text className="text-3xl font-bold items-center text-gray-800">Create an Account</Text>
                 <Text className="text-gray-500 mt-2">
                     Comece a organizar suas tarefas hoje mesmo no KeePace.
                 </Text>
@@ -164,7 +174,7 @@ export default function Register({ navigation }) {
                         <Feather name='mail' size={20}  color={email.length > 0 && !validateEmail(email) ? "#ef4444" : "#9ca3af"} />
                         <TextInput 
                             className="flex-1 ml-3 text-gray-700"
-                            placeholder='seu@email.com'
+                            placeholder='Email Address'
                             keyboardType='email-address'
                             autoCapitalize='none'
                             autoCorrect={false} // Evita que o corretor mude o e-mail
@@ -186,7 +196,7 @@ export default function Register({ navigation }) {
                         <Feather name="lock" size={20} color="#9ca3af" />
                         <TextInput 
                             className="flex-1 ml-3 text-gray-700"
-                            placeholder='••••••••'
+                            placeholder='Password'
                             secureTextEntry={!showPassword}
                             value={password}
                             onChangeText={setPassword}
@@ -210,7 +220,7 @@ export default function Register({ navigation }) {
                         <Feather name='check-circle' size={20} color="#9ca3af" />
                         <TextInput 
                             className="flex-1 ml-3 text-gray-700"
-                            placeholder='••••••••'
+                            placeholder='Confirm Password'
                             secureTextEntry={!showPassword}
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
@@ -230,7 +240,7 @@ export default function Register({ navigation }) {
                         <ActivityIndicator color="#fff" />
                     ) : (
 
-                        <Text className="text-white font-bold text-lg">Cadastrar</Text>
+                        <Text className="text-white font-bold text-lg">Create an Account</Text>
                     )}
 
                 </TouchableOpacity>
