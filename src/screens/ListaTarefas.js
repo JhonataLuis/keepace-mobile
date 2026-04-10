@@ -259,7 +259,7 @@ export default function ListaTarefas({ navigation }) {
             
             </View>
             {/* --- Conteúdo da Lista --- */}
-            <View className="flex-1 p-4">
+            <View className="flex-1 px-2 bg-gray-50">
                 {tasks.length === 0 && !loading ? (
                     // View centralizada para estado vazio
                     <View className="flex-1 items-center justify-center pb-20">

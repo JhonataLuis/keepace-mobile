@@ -59,6 +59,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
             if (existingTask) {
                 // Atualizar (PUT)
                 await api.put(`/tasks/tarefas/${existingTask.id}`, taskData);
+                    Toast.show({});
                 Alert.alert('Sucesso', 'Tarefa atualizada com sucesso!');
                 console.log("Dados sendo atualizados:", JSON.stringify(taskData, null, 2));
             } else {
@@ -95,7 +96,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
                             <Text className="text-gray-600 font-medium mb-2 ml-1">Titulo da Tarefa</Text>
                             <TextInput
                             className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-4 text-base text-gray-800"
-                            placeholder='Ex: Estudar React Native'
+                            placeholder='Ex: Ir no mercado sábado de manhã'
                             placeholderTextColor="#9ca3af"
                             value={titulo}
                             onChangeText={setTitulo}
