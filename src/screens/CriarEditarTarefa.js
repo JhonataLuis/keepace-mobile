@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
+import { Feather } from '@expo/vector-icons';
+import { format } from 'date-fns';
 import { useAuth } from '../services/AuthContext';
 import api from '../services/api'; // Instância do Axios
 import Toast from 'react-native-toast-message'; // mensagens estilizadas mais profissional
+import DateTimePicker from '@react-native-community/datetimepicker'; 
 
 export default function CriarEditarTarefa({ navigation, route }) {
 
@@ -18,8 +21,29 @@ export default function CriarEditarTarefa({ navigation, route }) {
     const [status, setStatus] = useState(existingTask?.status || 'TODO'); // Inicia com o STATUS A Fazer
     const [dueDate, setDueDate] = useState(existingTask?.dueDate || new Date().toISOString().split('T')[0]);
     const [updatedAt, setUpdatedAt] = useState(existingTask?.updatedAt || new Date().toISOString());
+    const [date, setDate] = useState(new Date()); // para dueDate
+    const [showPicker, setShowPicker] = useState(false); // para dueDate
+    const [mode, setMode] = useState('date'); // 'date' ou 'time' ? para dueDate
     const [loading, setLoading] = useState(false);
 
+    //
+    const onChange = (event, selectedDate) => {
+        const currentDate = selectedDate || date;
+        setShowPicker(Platform.OS === 'ios'); // No iOS o picker pode ficar aberto
+        setDate(currentDate);
+
+        // Aqui salva no estado de dueDate formatado para o Backend
+        // Exemplo: 2026-05-20T14:30:00
+        setDueDate(currentDate.toISOString());
+    };
+
+    //
+    const showMode = (currentMode) => {
+        setShowPicker(true);
+        setMode(currentMode);
+    };
+
+    //
     const saveTask = async () => {
         if (!titulo.trim()) {
             Toast.show({
@@ -35,8 +59,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
 
         try {
             // Garantindo para LocalDateTime válido para o Spring Boot (Backend)
-            // Se o dueDate for "2026-12-31", vira "2026-12-31T00:00:00"
-            const formattedDateTime = `${dueDate}T00:00:00`;
+            const formattedDateTime = date.toISOString();
 
             // Verifica se status é concluído para inserir a dataConclusao
             const isDone = status === 'DONE';
@@ -161,18 +184,44 @@ export default function CriarEditarTarefa({ navigation, route }) {
                                     <Picker.Item label='Urgente' value="Urgente"/>
                                 </Picker>
                             </View>
-                            <Text>Prazo de Entrega</Text>
-                            <TextInput
-                                className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-1 text-base"
-                                value={dueDate}
-                                onChangeText={setDueDate}
-                                placeholder='Ex: 2024-12-3'
-                                keyboardType='numeric'
-                                maxLength={10}
-                            />
-                            <Text className="text-gray-400 text-xs mb-4 ml-1">
-                                Use o formato Ano-Mês-Dia (Ex: 2024-05-20)
-                            </Text>
+                           
+                            <View className="mb-6">
+                                 <Text className="text-gray-600 font-medium mb-2 ml-1">Prazo de Entrega</Text>
+                                 <View className="flex-row justify-between">
+                                    {/* Botão Data */}
+                                    <TouchableOpacity
+                                        onPress={() => showMode('date')}
+                                        className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl p-4 mr-2 flex-row items-center justify-between"
+                                    >
+                                        <Text className="text-gray-800">
+                                            {format(date, 'dd/MM/yyyy')}
+                                        </Text>
+                                        <Feather name='calendar' size={18} color="#3b82f6" />
+                                    </TouchableOpacity>
+
+                                    {/* Botão Hora */}
+                                    <TouchableOpacity
+                                        onPress={() => showMode('time')}
+                                        className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl p-4 flex-row items-center justify-between"
+                                    >
+                                        <Text className="text-gray-800">
+                                            {format(date, 'HH:mm')}
+                                        </Text>
+                                        <Feather name='clock' size={18} color="#3b82f6" />
+                                    </TouchableOpacity>
+                                 </View>
+
+                                 {showPicker && (
+                                    <DateTimePicker
+                                        value={date}
+                                        mode={mode}
+                                        is24Hour={true}
+                                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                        onChange={onChange}
+                                    />
+                                 )}
+                            </View>
+                            
                             <TouchableOpacity
                                 className={`rounded-2xl p-4 mb-3 shadow-md ${loading ? 'bg-blue-400' : 'bg-blue-600'}`}
                                 onPress={saveTask}

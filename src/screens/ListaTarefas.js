@@ -330,10 +330,10 @@ export default function ListaTarefas({ navigation }) {
                 // Posicionamento dinâmico
                 bottom: 80 + insets.bottom // Sobe botão conforme a barra do android
               }} // Sombra no Android
-             className="absolute right-6 bg-green-600 w-16 h-16 rounded-2xl items-center justify-center shadow-lg z-50"
+             className="absolute right-6 bg-green-600 w-14 h-14 rounded-2xl items-center justify-center shadow-lg z-50"
              onPress={() => navigation.navigate('CriarEditarTarefa')}
             >
-                <Feather name="plus" size={32} color="white"/>
+                <Feather name="plus" size={24} color="white"/>
             </TouchableOpacity>
 
             {/* --- Footer Fixo com 4 Botões --- */}
