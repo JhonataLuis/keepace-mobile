@@ -24,8 +24,8 @@ export default function CriarEditarTarefa({ navigation, route }) {
         if (!titulo.trim()) {
             Toast.show({
                 type: 'error',
-                text1: "Erro",
-                text2: 'O título da tarefa é obrigatório.',
+                text1: "Campo obrigatório",
+                text2: 'O título da tarefa deve ser preenchido.',
                 visibilityTime: 3000
             });
             return;
@@ -59,13 +59,26 @@ export default function CriarEditarTarefa({ navigation, route }) {
             if (existingTask) {
                 // Atualizar (PUT)
                 await api.put(`/tasks/tarefas/${existingTask.id}`, taskData);
-                    Toast.show({});
-                Alert.alert('Sucesso', 'Tarefa atualizada com sucesso!');
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Sucesso!',
+                        text2: 'Tarefa atualizada com sucesso!',
+                        visibilityTime: 3000,
+                        autoHide: true,
+                        topOffset: 50, // Evita ficar colado no notch
+                    });
                 console.log("Dados sendo atualizados:", JSON.stringify(taskData, null, 2));
             } else {
                 // Criar novo (POST)
                 await api.post('/tasks/tarefas', taskData);
-                Alert.alert('Sucesso', 'Tarefa criada com sucesso!');
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Sucesso!',
+                        text2: 'Tarefa criada com sucesso',
+                        visibilityTime: 3000,
+                        autoHide: true,
+                        topOffset: 50,
+                    });
                 console.log("Dados sendo cadastrados:", JSON.stringify(taskData, null, 2));
             }
             navigation.goBack();
@@ -95,19 +108,19 @@ export default function CriarEditarTarefa({ navigation, route }) {
                             </Text>
                             <Text className="text-gray-600 font-medium mb-2 ml-1">Titulo da Tarefa</Text>
                             <TextInput
-                            className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-4 text-base text-gray-800"
-                            placeholder='Ex: Ir no mercado sábado de manhã'
-                            placeholderTextColor="#9ca3af"
-                            value={titulo}
-                            onChangeText={setTitulo}
-                            maxLength={100}
+                                className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-4 text-base text-gray-800"
+                                placeholder='Ex: Ir no mercado sábado de manhã'
+                                placeholderTextColor="#9ca3af"
+                                value={titulo}
+                                onChangeText={setTitulo}
+                                maxLength={100}
                             />
 
                             <Text className="text-gray-600 font-medium mb-2 ml-1">Categoria</Text>
                             <View className="bg-gray-50 border border-gray-200 rounded-2xl mb-4 overflow-hidden">
                                 <Picker
-                                selectedValue={categoria}
-                                onValueChange={(itemValue) => setCategoria(itemValue)}
+                                    selectedValue={categoria}
+                                    onValueChange={(itemValue) => setCategoria(itemValue)}
                                 >
                                     <Picker.Item label='Pessoal' value="PESSOAL" />
                                     <Picker.Item label='Trabalho' value="TRABALHO" />
@@ -118,8 +131,8 @@ export default function CriarEditarTarefa({ navigation, route }) {
                             <Text className="text-gray-600 font-medium mb-2 ml-1">Status</Text>
                             <View className="bg-gray-50 border border-gray-200 rounded-2xl mb-4 overflow-hidden">
                                 <Picker
-                                selectedValue={status}
-                                onValueChange={(itemValue) => setStatus(itemValue)}    
+                                    selectedValue={status}
+                                    onValueChange={(itemValue) => setStatus(itemValue)}    
                                 >
                                     <Picker.Item label='A Fazer' value="TODO" />
                                     <Picker.Item label='Em Andamento' value="DOING" />
@@ -128,13 +141,13 @@ export default function CriarEditarTarefa({ navigation, route }) {
                             </View>
                             <Text className="text-gray-600 font-medium mb-2 ml-1">Descrição</Text>
                             <TextInput
-                            className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-6 text-base text-gray-800"
-                            placeholderTextColor="#9ca3af"
-                            value={descricao}
-                            onChangeText={setDescricao}
-                            multiline
-                            numberOfLines={4}
-                            textAlignVertical='top'
+                                className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-6 text-base text-gray-800"
+                                placeholderTextColor="#9ca3af"
+                                value={descricao}
+                                onChangeText={setDescricao}
+                                multiline
+                                numberOfLines={4}
+                                textAlignVertical='top'
                             />
                             <Text className="text-gray-600 font-medium mb-2 ml-1">Prioridade</Text>
                             <View className="bg-gray-50 border border-gray-200 rounded-2xl mb-4 overflow-hidden">
@@ -150,20 +163,20 @@ export default function CriarEditarTarefa({ navigation, route }) {
                             </View>
                             <Text>Prazo de Entrega</Text>
                             <TextInput
-                            className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-1 text-base"
-                            value={dueDate}
-                            onChangeText={setDueDate}
-                            placeholder='Ex: 2024-12-3'
-                            keyboardType='numeric'
-                            maxLength={10}
+                                className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-1 text-base"
+                                value={dueDate}
+                                onChangeText={setDueDate}
+                                placeholder='Ex: 2024-12-3'
+                                keyboardType='numeric'
+                                maxLength={10}
                             />
                             <Text className="text-gray-400 text-xs mb-4 ml-1">
                                 Use o formato Ano-Mês-Dia (Ex: 2024-05-20)
                             </Text>
                             <TouchableOpacity
-                            className={`rounded-2xl p-4 mb-3 shadow-md ${loading ? 'bg-blue-400' : 'bg-blue-600'}`}
-                            onPress={saveTask}
-                            disabled={loading}
+                                className={`rounded-2xl p-4 mb-3 shadow-md ${loading ? 'bg-blue-400' : 'bg-blue-600'}`}
+                                onPress={saveTask}
+                                disabled={loading}
                             >
                                 {loading ? (
                                     <ActivityIndicator color="white" />

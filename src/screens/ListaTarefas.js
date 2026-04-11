@@ -4,6 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import api from '../services/api' // Instância do Axios
 import { useAuth } from '../services/AuthContext';
 import { Feather } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 
 export default function ListaTarefas({ navigation }) {
     const insets = useSafeAreaInsets(); // Pega as medidas das bordas (notch e botões do sistema)
@@ -74,17 +75,33 @@ export default function ListaTarefas({ navigation }) {
     const toggleComplete = async (task) => {
         try {
             // Inverte o status e envia para o backend via PUT ou PATCH
-            const updatedTask = { ...task, concluido: !task.concluido };
+            //const updatedTask = { ...task, concluido: !task.concluido };
 
-            await api.put(`/tasks/tarefas/${task.id}/concluir`, updatedTask);
-            console.log("Editando tarefa : ", updatedTask);
+            await api.patch(`/tasks/tarefas/${task.id}/concluir`);
+            console.log("Editando tarefa : ");
 
-            // Remove a tarefa da lista localmente (já que ela está concluida)
+            // Atualização Local da lista de tarefas (Optimistic Update)
+            // Remove a tarefa da lista de pendentes (já que ela está concluida)
             setTasks(prev => prev.filter(t => t.id !== task.id));
             //carregarTasks(true); // Recarrega apenas a primeira pagina para atualizar o status da tela
-            Alert.alert('Sucesso', 'Tarefa concluída!');
+            Toast.show({
+                type: 'success',
+                text1: 'Tarefa Concluída!',
+                text2: 'Bom trabalho!.',
+                visibilityTime: 3000,
+                autoHide: true,
+                topOffset: 50,
+            });
         } catch (error) {
-            Alert.alert('Erro', 'Não foi possível atualizar a tarefa.');
+            console.error("Erro ao concluir tarefa.", error);
+            Toast.show({
+                type: 'error',
+                text1: 'Erro!',
+                text2: 'Não foi possível concluir a tarefa.',
+                visibilityTime: 3000,
+                autoHide: true,
+                topOffset: 50,
+            });
         }
     };
 
@@ -313,7 +330,7 @@ export default function ListaTarefas({ navigation }) {
                 // Posicionamento dinâmico
                 bottom: 80 + insets.bottom // Sobe botão conforme a barra do android
               }} // Sombra no Android
-             className="absolute right-6 bg-green-600 w-16 h-16 rounded-full items-center justify-center shadow-lg z-50"
+             className="absolute right-6 bg-green-600 w-16 h-16 rounded-2xl items-center justify-center shadow-lg z-50"
              onPress={() => navigation.navigate('CriarEditarTarefa')}
             >
                 <Feather name="plus" size={32} color="white"/>
@@ -324,7 +341,7 @@ export default function ListaTarefas({ navigation }) {
                  style={{ paddingBottom: insets.bottom > 0 ? insets.bottom : 15, // Se não tiver barra (gestos), usa 15px
                     height: 70 + (insets.bottom > 0 ? insets.bottom : 0)
                  }}
-                 className="absolute bottom-0 w-full bg-white flex-row justify-around items-center py-4 border-t border-gray-200 shadow-xl">
+                 className="absolute bottom-0 w-full bg-white flex-row justify-around items-center py-4 border-t border-gray-100 shadow-xl">
                 <TouchableOpacity
                   className="items-center" 
                   onPress={() => navigation.navigate('Home')}>
