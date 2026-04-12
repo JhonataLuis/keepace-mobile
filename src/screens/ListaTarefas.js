@@ -88,10 +88,10 @@ export default function ListaTarefas({ navigation }) {
                 type: 'success',
                 text1: 'Tarefa Concluída!',
                 text2: 'Bom trabalho!.',
-                visibilityTime: 3000,
-                autoHide: true,
-                topOffset: 50,
-            });
+                visibilityTime: 3000, // Define quanto tempo o tast fica visível
+                autoHide: true, // Define se o toast some sozinho
+                topOffset: 50, // Define a distância do topo da tela
+            }); 
         } catch (error) {
             console.error("Erro ao concluir tarefa.", error);
             Toast.show({
