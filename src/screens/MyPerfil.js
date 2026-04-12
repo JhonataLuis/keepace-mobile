@@ -3,27 +3,47 @@ import { Image, View, Text, TouchableOpacity, ScrollView, Switch } from 'react-n
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../services/AuthContext';
+import Toast from 'react-native-toast-message';
 
 export default function Perfil({ navigation }) {
     const { user, logout } = useAuth();
 
     const BASE_URL = "http://192.168.5.115:8080";
 
+    // Função profissional para avisar sobre funções em desenvolvimento
+    const handleCommingSoon = (feature) => {
+        Toast.show({
+            typeof: 'info',
+            text1: 'Em desenvolvimento',
+            text2: `${feature} estará disponível em breve no KeePace!`,
+            visibilityTime: 3000,
+        });
+    };
+
     console.log("Perfil:", user);
     console.log("Nome USER:", user?.name);
 
-    const MenuOption = ({ icon, title, subtitle, onPress, color = "text-gray-700", isLast = false }) => (
+    const MenuOption = ({ icon, title, subtitle, onPress, color = "text-gray-700", isLast = false, isComingSoon = false }) => (
         <TouchableOpacity
-          onPress={onPress}
-          className={`flex-row items-center py-4 ${!isLast ? 'border-b border-gray-100' : ''}`}
+          onPress={isComingSoon ? () => handleCommingSoon(title) : onPress}
+          activeOpacity={0.7}
+          className={`flex-row items-center py-4 ${!isLast ? 'border-b border-gray-100' : ''} ${isComingSoon ? 'opacity-60' : ''}`}
         >
-            <View className="bg-blue-100 p-2 rounded-lg">
-                <Feather name={icon} size={20} color="#3b82f6"/>
+            <View className={`p-2 rounded-lg ${isComingSoon ? 'bg-gray-100' : 'bg-blue-100'}`}>
+                <Feather name={icon} size={20} color={isComingSoon ? "#9ca3af" : "#3b82f6"}/>
             </View>
             <View className="flex-1 ml-4">
-                <Text className={`text-base font-semibold ${color}`}>{title}</Text>
-                {subtitle && <Text className="text-xs text-gray-400">{subtitle}</Text>}
+                <View className="flex-row items-center">
+                    <Text className={`text-base font-semibold ${isComingSoon ? 'text-gray-400' : color}`}>{title}</Text>
+                    {isComingSoon && (
+                        <View className="bg-amber-100 px-2 py-0.5 rounded-full ml-2 border border-amber-200">
+                            <Text className="text-[8px] font-bold text-amber-600 uppercase">Em breve</Text>
+                        </View>
+                    )}
+                </View>
+                    {subtitle && <Text className="text-xs text-gray-400">{subtitle}</Text>}
             </View>
+            {!isComingSoon && <Feather name='chevron-right' size={16} color="#d1d5db" />}
         </TouchableOpacity>
     );
 
@@ -49,7 +69,7 @@ export default function Perfil({ navigation }) {
                         </View>
                         <TouchableOpacity 
                             className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md border border-gray-50"
-                            //onPress={() => } lógica para trocar a foto
+                            onPress={() => handleCommingSoon('Troca de foto')}
                             >
                             <Feather name='camera' size={16} color="#3b82f6" />
                         </TouchableOpacity>
@@ -65,25 +85,26 @@ export default function Perfil({ navigation }) {
             
                     <View>
                         <MenuOption 
-                        icon="user"
-                        title="Dados Pessoais"
-                        subtitle="Editar nome e informações"
-                        onPress={() => {}}
+                            icon="user"
+                            title="Dados Pessoais"
+                            subtitle="Editar nome e informações"
+                            isComingSoon={true} // Nova prop
+                            onPress={() => handleFeatureNotAvailable('Dados Pessoais')}
                         />
 
                         <MenuOption 
-                        icon="lock"
-                        title="Segurança"
-                        subtitle="Alterar senha e privacidade"
-                        onPress={() => navigation.navigate('AlterarSenha')}
+                            icon="lock"
+                            title="Segurança"
+                            subtitle="Alterar senha e privacidade"
+                            onPress={() => navigation.navigate('AlterarSenha')}
                         />
 
                         <MenuOption 
-                        icon="bell"
-                        title="Notificações"
-                        subtitle="Configurar lembretes de tarefas"
-                        isLast={true}
-                        onPress={() => {}}
+                            icon="bell"
+                            title="Notificações"
+                            subtitle="Configurar lembretes de tarefas"
+                            isLast={true}
+                            isComingSoon={true}
                         />
                     </View>
                 </View>
@@ -92,7 +113,8 @@ export default function Perfil({ navigation }) {
                 <View className="px-5 mb-6">
                     <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Preferências</Text>
                     <View className="bg-white rounded-3xl px-4 shadow-sm border border-blue-100">
-                        <View className="flex-row items-center py-4 border-b border-gray-100">
+                        {/* Modo Escuro (Visual Desabilitado) */}
+                        <View className="flex-row items-center py-4 border-b border-gray-100 opacity-50">
                             <View className="bg-blue-100 p-2 rounded-lg">
                                 <Feather name='moon' size={20} color="#3b82f6" />
                             </View>
@@ -100,14 +122,16 @@ export default function Perfil({ navigation }) {
                                 <Text className="text-base font-semibold text-gray-700">Modo Escuro</Text>
                             </View>
                             <Switch 
-                             trackColor={{ false: "#d1d5db", true: "#bfdbfe" }}
-                             thumbColor={true ? "#3b82f6" : "#f4f3f4"}
+                                disabled={true}
+                                trackColor={{ false: "#d1d5db", true: "#bfdbfe" }}
+                                thumbColor="#f4f3f4"
                             />
                         </View>
                         <MenuOption 
-                         icon="help-circle"
-                         title="Ajuda & Suporte"
-                         onPress={() => {}}
+                            icon="help-circle"
+                            title="Ajuda & Suporte"
+                            isLast={true}
+                            isComingSoon={true}
                         />
                     </View>
                 </View>
@@ -121,8 +145,8 @@ export default function Perfil({ navigation }) {
                         <Feather name='log-out' size={20} color="#ef4444" />
                         <Text className="ml-2 text-red-500 font-bold text-lg">Sair da Conta</Text>
                     </TouchableOpacity>
-                        <Text className="text-center text-gray-300 text-xs mt-6">
-                            KeePace v1.0.0
+                        <Text className="text-center text-gray-300 text-[10px] mt-6 uppercase tracking-tighter">
+                            KeePace v1.0.0 • Feito com ❤️
                         </Text>
                 </View>
             </ScrollView>
