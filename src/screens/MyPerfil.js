@@ -236,8 +236,8 @@ export default function Perfil({ navigation }) {
                         <Feather name='log-out' size={20} color="#ef4444" />
                         <Text className="ml-2 text-red-500 font-bold text-lg">Sair da Conta</Text>
                     </TouchableOpacity>
-                        <Text className="text-center text-gray-300 text-[10px] mt-6 uppercase tracking-tighter">
-                            KeePace v1.0.0 • Feito com ❤️
+                        <Text className="text-center text-gray-300 text-[10px] mt-6 tracking-tighter">
+                            KeePace v1.0.0
                         </Text>
                 </View>
             </ScrollView>
