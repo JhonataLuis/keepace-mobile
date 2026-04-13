@@ -6,6 +6,26 @@ import { useAuth } from '../services/AuthContext';
 import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 
+// Para formatar a data da entrega tarefa
+const formatarDataExibicao = (dataString) => {
+    if(!dataString) return 'Sem data';
+
+    try{
+      const data = new Date(dataString);
+
+      // Usando toLocaleString 
+      return data.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+        return 'Data inválida';
+    }
+};
+
 export default function ListaTarefas({ navigation }) {
     const insets = useSafeAreaInsets(); // Pega as medidas das bordas (notch e botões do sistema)
 
@@ -33,6 +53,9 @@ export default function ListaTarefas({ navigation }) {
       'ALTA': { border: 'border-orange-500', text: '#f97316', check: '#f97316'}, // Laranja
       'URGENTE': { border: 'border-red-600', text: '#dc2626', check: '#dc2626'}, // Vermelho
     };
+
+    // Função para informar com cores sobre a data de entrega da tarefa, atrasado, hoje, amanhã
+    
 
     const carregarTasks = async (isFirstLoad = false) => {
         if (loading) return;
@@ -163,7 +186,7 @@ export default function ListaTarefas({ navigation }) {
                             </View>
                             <View className="bg-gray-100 px-2 py-0.5 rounded">
                                 <Text className="text-[10px] text-blue-500">
-                                    {item.dueDate}
+                                    {formatarDataExibicao(item.dueDate)}
                                 </Text>
                             </View>
                         </View>
@@ -192,9 +215,9 @@ export default function ListaTarefas({ navigation }) {
             <View className="bg-white pt-12 pb-4 px-6 flex-row justify-between items-center shadow-sm z-50">
                     <Text className="text-xl font-bold text-gray-800">Minhas Tarefas</Text>
                 <View className="flex-row">
-                    <TouchableOpacity className="p-2 mr-2 bg-gray-100 rounded-full">
-                        <Feather name="list" size={20} color="#4b5563" />
-                    </TouchableOpacity>
+                    {/*<TouchableOpacity className="p-2 mr-2 bg-gray-100 rounded-full">
+                        <Feather name="list" size={20} color="#4b5563" /> // Implementar próxima versão
+                    </TouchableOpacity>*/}
 
                     {/* Container do Menu */}
                     <View>

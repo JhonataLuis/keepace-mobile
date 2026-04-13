@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Alert } from 'react-native';
 import { SafeAreaView  } from 'react-native-safe-area-context';
 import { Feather} from '@expo/vector-icons';
 import api from '../services/api';
@@ -15,10 +15,22 @@ export default function TarefasConcluidas({ navigation }) {
     const [selectedTask, setSelectedTask] = useState(null); // Tarefa clicada
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-    // Abre o dropdown
+    // Abre o dropdown com a opção de excluir
     const openMenu = (item) => {
         setSelectedTask(item);
-        setMenuVisible(true);
+        //setMenuVisible(true);
+
+            Alert.alert(
+            "Excluir Tarefa?",
+             item.titulo,
+            [
+                { text: "Excluir", onPress: () => setIsDeleteModalVisible(true), // Abre seu modal bonitão de confirmação
+                    style: "destructive", color: "#ef4444" // No iOS fica vermelho automaticamente
+                },
+                { text: "Cancelar", style: "cancel" }
+            ],
+            { cancelable: true }
+        );
     };
 
     // Dispara o processo de exclusão
@@ -133,9 +145,9 @@ export default function TarefasConcluidas({ navigation }) {
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-100">
+        <SafeAreaView className="flex-1 bg-white">
             {/* Header Manual */}
-            <View className="bg-white p-4 flex-row items-center border-b border-gray-200">
+            <View className="bg-white p-4 flex-row items-center border-b border-gray-100">
                 <TouchableOpacity onPress={() => navigation.goBack()} className="p-2">
                     <Feather name='arrow-left' size={24} color="#1f2937" />
                 </TouchableOpacity>
@@ -165,53 +177,8 @@ export default function TarefasConcluidas({ navigation }) {
                     />
                 )}
             </View>
-
-            {/* Dropdown de Opções */}
-            <Modal
-                visible={menuVisible}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setMenuVisible(false)}
-            >
-                <TouchableOpacity 
-                    className="flex-1 bg-black/10" 
-                    activeOpacity={1} 
-                    onPress={() => setMenuVisible(false)}
-                >
-                    {/* Ajuste o posicionamento conforme sua necessidade ou use coordenadas */}
-                    <View className="absolute right-10 top-20 bg-white rounded-2xl shadow-xl border border-gray-100 w-48 overflow-hidden">
-                        <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-50 active:bg-gray-100">
-                            <Feather name="edit-2" size={16} color="#4b5563" />
-                            <Text className="ml-3 text-gray-700">Editar</Text>
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-50 active:bg-gray-100">
-                            <Feather name="share-2" size={16} color="#4b5563" />
-                            <Text className="ml-3 text-gray-700">Compartilhar</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-50 active:bg-gray-100">
-                            <Feather name="copy" size={16} color="#4b5563" />
-                            <Text className="ml-3 text-gray-700">Duplicar</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-50 active:bg-gray-100">
-                            <Feather name="archive" size={16} color="#4b5563" />
-                            <Text className="ml-3 text-gray-700">Arquivar</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity 
-                            onPress={handleActionExcluir}
-                            className="flex-row items-center p-4 active:bg-red-50"
-                        >
-                            <Feather name="trash-2" size={16} color="#ef4444" />
-                            <Text className="ml-3 text-red-500 font-semibold">Excluir tarefa</Text>
-                        </TouchableOpacity>
-                    </View>
-                </TouchableOpacity>
-            </Modal>
+           
             <View>
-
                 {/* Modal de Confirmação de Exclusão */}
                 <Modal
                     visible={isDeleteModalVisible}
@@ -231,25 +198,32 @@ export default function TarefasConcluidas({ navigation }) {
                                 A tarefa "<Text className="font-bold text-gray-700">{selectedTask?.titulo}</Text>" será removida permanentemente.
                             </Text>
 
-                            <View className="flex-row w-full space-x-3">
+                            <View className="flex-row w-full space-x-3 mt-4">
                                 <TouchableOpacity 
+                                    activeOpacity={0.7}
                                     onPress={() => setIsDeleteModalVisible(false)}
-                                    className="flex-1 bg-gray-100 p-4 rounded-2xl items-center"
+                                    className="flex-1 bg-gray-100 p-4 rounded-2xl flex-row items-center justify-center"
                                 >
-                                    <Text className="text-gray-600 font-bold">Cancelar</Text>
+                                    <Text className="text-gray-600 font-bold text-base">
+                                        Cancelar
+                                    </Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity 
+                                activeOpacity={0.8}
                                     onPress={() => {
                                         // Sua lógica de excluir aqui
                                         deletarTarefaApi(selectedTask?.id);
                                     }}
-                                    className="flex-1 bg-red-500 p-4 rounded-2xl items-center shadow-lg shadow-red-200"
+                                    className="flex-1 bg-red-500 p-4 rounded-2xl flex-row items-center justify-center shadow-lg shadow-red-300"
                                 >
-                                    <Text className="text-white font-bold">Excluir</Text>
+                                    <Feather name='trash-2' size={18} color="white" />
+                                    <Text className="text-white font-bold ml-2 text-base">
+                                         Excluir
+                                    </Text>
                                 </TouchableOpacity>
                             </View>
-                        </View>
+                        </View> 
                     </View>
                 </Modal>
             </View>

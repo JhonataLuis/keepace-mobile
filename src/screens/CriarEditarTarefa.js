@@ -12,6 +12,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 export default function CriarEditarTarefa({ navigation, route }) {
 
     const existingTask = route.params?.task;
+    // Converte a string do banco para um objeto Date real se existir
+    const initialDate = existingTask?.dueDate ? new Date(existingTask.dueDate) : new Date();
 
     const { user } = useAuth();
     const [titulo, setTitulo] = useState(existingTask?.titulo || '');
@@ -19,22 +21,35 @@ export default function CriarEditarTarefa({ navigation, route }) {
     const [categoria, setCategoria] = useState(existingTask?.categoria || 'PESSOAL');
     const [prioridade, setPrioridade] = useState(existingTask?.prioridade || '');
     const [status, setStatus] = useState(existingTask?.status || 'TODO'); // Inicia com o STATUS A Fazer
-    const [dueDate, setDueDate] = useState(existingTask?.dueDate || new Date().toISOString().split('T')[0]);
     const [updatedAt, setUpdatedAt] = useState(existingTask?.updatedAt || new Date().toISOString());
-    const [date, setDate] = useState(new Date()); // para dueDate
+    const [date, setDate] = useState(initialDate); // para dueDate
     const [showPicker, setShowPicker] = useState(false); // para dueDate
     const [mode, setMode] = useState('date'); // 'date' ou 'time' ? para dueDate
     const [loading, setLoading] = useState(false);
 
     //
     const onChange = (event, selectedDate) => {
+        // No Android, quando cancela, selectedDate vem undefined
+        if(event.type === 'dismissed'){
+            setShowPicker(false);
+            return;
+        }
+
         const currentDate = selectedDate || date;
-        setShowPicker(Platform.OS === 'ios'); // No iOS o picker pode ficar aberto
         setDate(currentDate);
 
-        // Aqui salva no estado de dueDate formatado para o Backend
-        // Exemplo: 2026-05-20T14:30:00
-        setDueDate(currentDate.toISOString());
+        // Se estiver no Android e acabou de selecionar a DATA,
+        // você pode querer abrir automaticamente a HORA.
+        if(Platform.OS === 'android'){
+            setShowPicker(false); // Fecha o de data
+            if(mode === 'date') {
+                // Pequeno delay para não bugar o sistema de janelas do Android
+                setTimeout(() => showMode('time'), 100);
+            }
+        } else {
+             setShowPicker(Platform.OS === 'ios'); // No iOS o picker pode ficar aberto
+        }
+
     };
 
     //
@@ -59,7 +74,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
 
         try {
             // Garantindo para LocalDateTime válido para o Spring Boot (Backend)
-            const formattedDateTime = date.toISOString();
+            const formattedDateTime = format(date, "yyyy-MM-dd'T'HH:mm:ss");
 
             // Verifica se status é concluído para inserir a dataConclusao
             const isDone = status === 'DONE';
@@ -74,7 +89,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
                 dueDate: formattedDateTime, // Formato para LocalDateTime Spring Boot do Java
                 // Verifica se for DONE, envia data atual, senão null
                 concluido: isDone,
-                dataConclusao: isDone ? new Date().toISOString() : null,
+                dataConclusao: isDone ? format(new Date(), "yyyy-MM-dd'T'HH:mm:ss") : null,
                 updatedAt: updatedAt
                
             };
