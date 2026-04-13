@@ -235,27 +235,27 @@ export default function ListaTarefas({ navigation }) {
                                 }}
                                  className="bg-white rounded-xl border border-gray-100 overflow-hidden"
                                 >
-                                    <TouchableOpacity 
+                                    {/*<TouchableOpacity 
                                         className="flex-row items-center p-4 border-b border-gray-50 active:bg-gray-50"
                                         onPress={() => {
                                             setMenuVisible(false);
-                                            carregarTasks(true); // Exemplo de ação
+                                            carregarTasks(true); // Exemplo de ação/ Implementar próxima feature
                                         }}
                                     >
                                         <Feather name="mail" size={16} color="#4b5563" />
                                         <Text className="ml-3 text-gray-700">Enviar por e-mail</Text>
-                                    </TouchableOpacity>
+                                    </TouchableOpacity>*/}
 
-                                     <TouchableOpacity 
+                                     {/*<TouchableOpacity 
                                         className="flex-row items-center p-4 border-b border-gray-50 active:bg-gray-50"
                                         onPress={() => {
                                             setMenuVisible(false);
-                                            carregarTasks(true); // Exemplo de ação
+                                            carregarTasks(true); // Exemplo de ação/ Implementar próxima feature
                                         }}
                                     >
                                         <Feather name="message-square" size={16} color="#4b5563" />
                                         <Text className="ml-3 text-gray-700">Comentários</Text>
-                                    </TouchableOpacity>
+                                    </TouchableOpacity>*/}
 
                                         <TouchableOpacity 
                                             className="flex-row items-center p-4 active:bg-gray-50"
