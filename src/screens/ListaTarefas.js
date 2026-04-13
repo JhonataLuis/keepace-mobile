@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Alert, Pressable } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { isBefore, isToday, isTomorrow, startOfDay } from 'date-fns';
 import api from '../services/api' // Instância do Axios
 import { useAuth } from '../services/AuthContext';
 import { Feather } from '@expo/vector-icons';
@@ -34,7 +35,9 @@ export default function ListaTarefas({ navigation }) {
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
     const [menuVisible, setMenuVisible] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
     const { user } = useAuth();
+
 
     useEffect(() => {
         // Carrega a primeira vez que o componente monta
@@ -55,7 +58,37 @@ export default function ListaTarefas({ navigation }) {
     };
 
     // Função para informar com cores sobre a data de entrega da tarefa, atrasado, hoje, amanhã
-    
+    const obterEstiloPrazo = (dataString) => {
+        if (!dataString) return { container: 'bg-gray-100', text: 'text-gray-500' };
+
+        const dataEntrega = new Date(dataString);
+        const agora = new Date();
+
+        // Se o horário atual já passou da data de entrega (Independente de ser hoje ou não)
+        if(isBefore(dataEntrega, agora)){
+            return { container: 'bg-red-100', text: 'text-red-600', icone: 'alert-circle' };
+        }
+
+        // Se for hoje
+        if (isToday(dataEntrega)) {
+            return { container: 'bg-orange-100', text: 'text-orange-600', icone: 'clock' };
+        }
+
+        // Se for amanhã
+        if (isTomorrow(dataEntrega)) {
+            return { container: 'bg-blue-100', text: 'text-blue-600', icone: 'calendar' };
+        }
+
+        // Futuro distante
+        return { container: 'bg-purple-100', text: 'text-purple-500', icone: 'calendar' };
+    };
+
+    // Função para recarregar dados quando usuário arrastar o dedo na tela para baixo
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await carregarTasks(true); // O carregarTasks(true) já reseta a lista e a página
+        setRefreshing(false);
+    };
 
     const carregarTasks = async (isFirstLoad = false) => {
         if (loading) return;
@@ -136,73 +169,91 @@ export default function ListaTarefas({ navigation }) {
         
 
         return (
-        <View 
-            style={{ borderLeftColor: item.concluido ? '#d1d5db' : estiloPrioridade.check }}
-            className="bg-white rounded-xl p-4 mb-3 shadow-sm border-l-4">
-            <View className="flex-row justify-between items-start">
-                <View className="flex-1 mr-3">
-                    {/* Botão para concluir (Clique no texto ou ícone) */}
-                    <TouchableOpacity 
-                        onPress={() => toggleComplete(item)}
-                        className="flex-row items-center"
-                        >
-                            {/* Ícone de Checkbox com cor dinâmico  */}
-                            <Feather name={item.concluido ? "check-circle" : "circle"}
-                                size={20}
-                                color={item.concluido ? "#9ca3af" : estiloPrioridade.check}
-                                className="mr-2"
-                            />
-                        <Text className={`text-lg font-semibold ${item.concluido ? 'line-through text-gray-400' : 'text-gray-800'}`}>
-                            {item.titulo}
-                        </Text>
-                    </TouchableOpacity>
-                    {item.descricao && (
-                        <Text 
-                            numberOfLines={1} // Limita a 3 linhas
-                            ellipsizeMode='tail' // Adiciona o "..." no final
-                            className={`text-sm mt-1 ml-7 ${item.concluido ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {item.descricao}
-                        </Text>
-                    )}
-
-                    {/* Badge de Categoria/Prioridade */}
-                    {!item.concluido && (
-                        <View className="flex-row mt-2 ml-7 items-center">
-                            <Text className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded mr-2">
-                                {item.categoria}
-                            </Text>
-
-                            {/* Prioridade com cor de texto dinâmica */}
-                            <View className="flex-row items-center bg-gray-100 px-2 py-0.5 rounded mr-2">
-                                <View 
-                                    style={{ backgroundColor: estiloPrioridade.check }}
-                                        className="w-2 h-2 rounded-full mr-1"
+        <View>
+                {/* Container principal em um botão de ação editar */}
+                <Pressable 
+                    activeOpacity={0.8}
+                    onPress={() => navigation.navigate('CriarEditarTarefa', { task: item })}
+                    style={({ pressed }) => [
+                        {
+                            borderLeftColor: item.concluido ?  '#d1d5db' : estiloPrioridade.check,
+                            backgroundColor: pressed ? '#e5e7eb' : '#ffffff', // Efeito: cinza claro ao clicar
+                            transform: [{ scale: pressed ? 0.98 : 1 }], // Efeito: encolhe levemente ao clicar
+                        },
+                        // Classes Tailwind aqui(exceto a cor de fundo que é dinamica)
+                        { borderRadius: 12, padding: 16, marginBottom: 12, borderLeftWidth: 4 }
+                    ]}
+                    // Efeito de onda (Ripple) exclusivo para Android
+                    android_ripple={{ color: '#e5e7eb' }}
+                >
+                <View className="flex-row justify-between items-start">
+                    <View className="flex-1">
+                        <View className="flex-row items-center">
+                            {/* Botão checkbox para concluir (Clique no texto ou ícone) */}
+                            <Pressable 
+                                onPress={() => toggleComplete(item)}
+                                hitSlop={{ top: 10 }} // Aumenta a área do toque
+                                className="mr-3"
+                                >
+                                    {/* Ícone de Checkbox com cor dinâmico  */}
+                                    <Feather name={item.concluido ? "check-circle" : "circle"}
+                                        size={22}
+                                        color={item.concluido ? "#9ca3af" : estiloPrioridade.check}
                                     />
-                                 <Text 
-                                    style={{ color: estiloPrioridade.text }}
-                                    className="text-[10px] font-bold">
-                                {chavePrioridade}
-                            </Text>
-                            </View>
-                            <View className="bg-gray-100 px-2 py-0.5 rounded">
-                                <Text className="text-[10px] text-blue-500">
-                                    {formatarDataExibicao(item.dueDate)}
+                            </Pressable>
+                                <Text className={`text-lg font-semibold flex-1 ${item.concluido ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                                    {item.titulo}
                                 </Text>
-                            </View>
                         </View>
-                    )}
-                </View>
+                        {item.descricao && (
+                            <Text 
+                                numberOfLines={1} // Limita a 3 linhas
+                                ellipsizeMode='tail' // Adiciona o "..." no final
+                                className={`text-sm mt-1 ml-8 ${item.concluido ? 'text-gray-400' : 'text-gray-600'}`}>
+                                {item.descricao}
+                            </Text>
+                        )}
 
-                {/* Botão editar */}
-                <View className="flex-row items-center">
-                    <TouchableOpacity
-                     onPress={() => navigation.navigate('CriarEditarTarefa', { task: item })}
-                     className="p-2 bg-blue-500 rounded-lg"
-                    >
-                        <Feather name="edit-2" size={18} color="white" />
-                    </TouchableOpacity>
+                        {/* Badge de Categoria/Prioridade */}
+                        {!item.concluido && (
+                            <View className="flex-row mt-2 ml-8 items-center">
+                                <Text className="text-[10px] font-medium bg-gray-100 text-gray-500 px-2 py-0.5 rounded mr-2">
+                                    {item.categoria}
+                                </Text>
+
+                                {/* Prioridade com cor de texto dinâmica */}
+                                <View className="flex-row items-center bg-gray-100 px-2 py-0.5 rounded mr-2">
+                                    <View 
+                                        style={{ backgroundColor: estiloPrioridade.check }}
+                                            className="w-2 h-2 rounded-full mr-1"
+                                        />
+                                    <Text 
+                                        style={{ color: estiloPrioridade.text }}
+                                        className="text-[10px] font-bold">
+                                        {chavePrioridade}
+                                    </Text>
+                                </View>
+                                {/* */}
+                                {item.dueDate && (
+                                <View className={`flex-row items-center px-2 py-0.5 rounded ${obterEstiloPrazo(item.dueDate).container}`}>
+                                    <Feather 
+                                        name={obterEstiloPrazo(item.dueDate).icone}
+                                        size={10}
+                                        color={obterEstiloPrazo(item.dueDate).text === 'text-red-600' ? '#dc2626' : 
+                                            obterEstiloPrazo(item.dueDate).text === 'text-orange-600' ? '#ea580c' : '#6b7280'}
+                                        style={{ marginRight: 4 }}
+                                    />
+                                    <Text className={`text-[10px] font-medium ${obterEstiloPrazo(item.dueDate).text}`}>
+                                        {isToday(new Date(item.dueDate)) ? 'Hoje ' : isTomorrow(new Date(item.dueDate)) ? 'Amanhã ' : ''}
+                                        {formatarDataExibicao(item.dueDate)}
+                                    </Text>
+                                </View>
+                                )}
+                            </View>
+                        )}
+                    </View>
                 </View>
-            </View>
+            </Pressable>
         </View>
         );
 };
@@ -320,6 +371,10 @@ export default function ListaTarefas({ navigation }) {
                         renderItem={renderTask}
                         keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
                         contentContainerStyle={{ paddingTop: 16, paddingBottom: 150 }}
+
+                        // Para atualizar pagina e recarregar os dados quando arrastar o dedo na tela mobile
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
                         
                         // SÓ CHAMA SE: não estiver carregando E se tiver mais dados
                         onEndReached={() => {
@@ -330,7 +385,7 @@ export default function ListaTarefas({ navigation }) {
                         }}
                         onEndReachedThreshold={0.1} // 0.1 é mais seguro que 0.5 para evitar loops
                         ListFooterComponent={() => (
-                            loading ? (
+                            loading && !refreshing ? ( // adicionado !refreshing para não mostrar dois loaders
                                 <View className="py-4">
                                     <ActivityIndicator size="large" color="#16a34a" />    
                                 </View>
