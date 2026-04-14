@@ -85,28 +85,24 @@ export default function Home({ navigation }) {
 
                     {/* Dashboard de Estatísticas */}
                     {/* Dashboard de Estatísticas */}
-                    <View className="mt-6 flex-row justify-between">
+                    <View className="mt-6 flex-row justify-between items-end">
                         {/* Card TOTAL */}
-                        <TouchableOpacity 
-                            onPress={() => navigation.navigate('ListaTarefas', { filter: 'all' })}
-                            activeOpacity={0.7}
-                            className="bg-white rounded-3xl p-5 flex-1 mr-2 border border-gray-100 items-center shadow-sm"
+                        <View 
+                            className="bg-gray-100/50 rounded-3xl p-5 flex-1 mr-2 border border-gray-200/50 items-center justify-center"
                         >
-                            <Feather name='list' size={20} color={stats.total > 0 ? "#3b82f6" : "#9ca3af"} />
-                            <Text className={`text-2xl font-black mt-2 ${stats.total > 0 ? 'text-gray-800' : 'text-gray-300'}`}>
-                                {stats.total || 0}
-                            </Text>
-                            <Text className="text-gray-400 text-[10px] uppercase font-bold tracking-widest text-center">Total</Text>
-                        </TouchableOpacity>
+                            <Feather name='database' size={20} color="#9ca3af" />
+                            <Text className="text-xl font-black text-gray-500">{stats.total || 0}</Text>
+                            <Text className="text-gray-400 text-[9px] uppercase font-black">Geral</Text>
+                        </View>
 
                         {/* Card FEITAS */}
                         <TouchableOpacity 
                             onPress={() => navigation.navigate('TarefasConcluidas', { filter: 'completed' })}
                             activeOpacity={0.7}
-                            className="bg-white rounded-3xl p-5 flex-1 mx-1 border border-gray-100 items-center shadow-sm"
+                            className="bg-white rounded-3xl p-5 flex-[1.2] mx-1 border border-gray-100 items-center shadow-sm"
                         >
                             <Feather name='check-circle' size={20} color={stats.completed > 0 ? "#10b981" : "#9ca3af"} />
-                            <Text className={`text-2xl font-black mt-2 ${stats.completed > 0 ? 'text-gray-800' : 'text-gray-300'}`}>
+                            <Text className={`text-2xl font-black mt-1 ${stats.completed > 0 ? 'text-gray-800' : 'text-gray-300'}`}>
                                 {stats.completed || 0}
                             </Text>
                             <Text className="text-gray-400 text-[10px] uppercase font-bold tracking-widest text-center">Feitas</Text>
@@ -116,10 +112,10 @@ export default function Home({ navigation }) {
                         <TouchableOpacity 
                             onPress={() => navigation.navigate('ListaTarefas', { filter: 'pending' })}
                             activeOpacity={0.7}
-                            className="bg-white rounded-3xl p-5 flex-1 ml-2 border border-gray-100 items-center shadow-sm"
+                            className="bg-white rounded-3xl p-5 flex-[1.2] ml-2 border border-gray-100 items-center shadow-sm"
                         >
                             <Feather name="clock" size={20} color={stats.pending > 0 ? "#f59e0b" : "#9ca3af"} />
-                            <Text className={`text-2xl font-black mt-2 ${stats.pending > 0 ? 'text-gray-800' : 'text-gray-300'}`}>
+                            <Text className={`text-2xl font-black mt-1 ${stats.pending > 0 ? 'text-gray-800' : 'text-gray-300'}`}>
                                 {stats.pending || 0}
                             </Text>
                             <Text className="text-gray-400 text-[10px] uppercase font-bold tracking-widest text-center">Faltam</Text>

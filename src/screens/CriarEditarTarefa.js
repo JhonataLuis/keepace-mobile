@@ -13,12 +13,12 @@ export default function CriarEditarTarefa({ navigation, route }) {
 
     const existingTask = route.params?.task;
     // Converte a string do banco para um objeto Date real se existir
-    const initialDate = existingTask?.dueDate ? new Date(existingTask.dueDate) : new Date();
+    const initialDate = existingTask?.dueDate ? new Date(existingTask.dueDate) : null;
 
     const { user } = useAuth();
     const [titulo, setTitulo] = useState(existingTask?.titulo || '');
     const [descricao, setDescricao] = useState(existingTask?.descricao || '');
-    const [categoria, setCategoria] = useState(existingTask?.categoria || 'PESSOAL');
+    const [categoria, setCategoria] = useState(existingTask?.categoria || '');
     const [prioridade, setPrioridade] = useState(existingTask?.prioridade || '');
     const [status, setStatus] = useState(existingTask?.status || 'TODO'); // Inicia com o STATUS A Fazer
     const [updatedAt, setUpdatedAt] = useState(existingTask?.updatedAt || new Date().toISOString());
@@ -35,7 +35,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
             return;
         }
 
-        const currentDate = selectedDate || date;
+        const currentDate = selectedDate || new Date(); // Fallback para hoje se vier vazio
         setDate(currentDate);
 
         // Se estiver no Android e acabou de selecionar a DATA,
@@ -74,7 +74,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
 
         try {
             // Garantindo para LocalDateTime válido para o Spring Boot (Backend)
-            const formattedDateTime = format(date, "yyyy-MM-dd'T'HH:mm:ss");
+            const formattedDateTime = date ? format(date, "yyyy-MM-dd'T'HH:mm:ss") : null;
 
             // Verifica se status é concluído para inserir a dataConclusao
             const isDone = status === 'DONE';
@@ -83,10 +83,10 @@ export default function CriarEditarTarefa({ navigation, route }) {
             const taskData = {
                 titulo: titulo.trim(),
                 descricao: descricao.trim(),
-                categoria: categoria,
-                prioridade: prioridade,
+                categoria: categoria || null, // se estiver vazio, envia null, caso contrário envia o valor
+                prioridade: prioridade || null, // **
                 status: status,
-                dueDate: formattedDateTime, // Formato para LocalDateTime Spring Boot do Java
+                dueDate: formattedDateTime, // Formato para LocalDateTime Spring Boot do Java / envia null se usuário não escolher data
                 // Verifica se for DONE, envia data atual, senão null
                 concluido: isDone,
                 dataConclusao: isDone ? format(new Date(), "yyyy-MM-dd'T'HH:mm:ss") : null,
@@ -160,6 +160,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
                                     selectedValue={categoria}
                                     onValueChange={(itemValue) => setCategoria(itemValue)}
                                 >
+                                    <Picker.Item label='Selecione...' value="" color='#9ca3af' />
                                     <Picker.Item label='Pessoal' value="PESSOAL" />
                                     <Picker.Item label='Trabalho' value="TRABALHO" />
                                     <Picker.Item label='Estudos' value="ESTUDOS" />
@@ -193,6 +194,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
                                 selectedValue={prioridade}
                                 onValueChange={(itemValue) => setPrioridade(itemValue)}
                                 >
+                                    <Picker.Item label='Selecione...' value="" color="#9ca3af" />
                                     <Picker.Item label='Baixa' value="Baixa"/>
                                     <Picker.Item label='Média' value="Media"/>
                                     <Picker.Item label='Alta' value="Alta"/>
@@ -201,15 +203,24 @@ export default function CriarEditarTarefa({ navigation, route }) {
                             </View>
                            
                             <View className="mb-6">
-                                 <Text className="text-gray-600 font-medium mb-2 ml-1">Prazo de Entrega</Text>
+                                <View className="flex-row justify-between items-center mb-2 ml-1">
+                                    <Text className="text-gray-600 font-medium">Prazo de Entrega</Text>
+                                    {date && (
+                                        <TouchableOpacity
+                                            onPress={() => setDate(null)}>
+                                            <Text className="text-red-400 text-xs font-bold">Remover prazo</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                </View>
+
                                  <View className="flex-row justify-between">
                                     {/* Botão Data */}
                                     <TouchableOpacity
                                         onPress={() => showMode('date')}
                                         className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl p-4 mr-2 flex-row items-center justify-between"
                                     >
-                                        <Text className="text-gray-800">
-                                            {format(date, 'dd/MM/yyyy')}
+                                        <Text className={date ? "text-gray-800" : "text-gray-400"}>
+                                            {date ? format(date, 'dd/MM/yyyy') : 'Definir data'}
                                         </Text>
                                         <Feather name='calendar' size={18} color="#3b82f6" />
                                     </TouchableOpacity>
@@ -219,8 +230,8 @@ export default function CriarEditarTarefa({ navigation, route }) {
                                         onPress={() => showMode('time')}
                                         className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl p-4 flex-row items-center justify-between"
                                     >
-                                        <Text className="text-gray-800">
-                                            {format(date, 'HH:mm')}
+                                        <Text className={date ? "text-gray-800" : "text-gray-400"}>
+                                            {date ? format(date, 'HH:mm') : 'Definir hora'}
                                         </Text>
                                         <Feather name='clock' size={18} color="#3b82f6" />
                                     </TouchableOpacity>
@@ -228,7 +239,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
 
                                  {showPicker && (
                                     <DateTimePicker
-                                        value={date}
+                                        value={date || new Date()} // Se for null, abre no dia de hoje
                                         mode={mode}
                                         is24Hour={true}
                                         display={Platform.OS === 'ios' ? 'spinner' : 'default'}
