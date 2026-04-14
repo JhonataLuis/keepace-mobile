@@ -119,7 +119,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
                     });
                 console.log("Dados sendo cadastrados:", JSON.stringify(taskData, null, 2));
             }
-            navigation.goBack();
+            navigation.navigate('ListaTarefas');
         } catch (error) {
             console.log('Erro ao salvar a tarefa:', error);
             const msg = error.response?.data?.message || 'Não foi possível salvar a tarefa';

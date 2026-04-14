@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Alert, Pressable } from 'react-native';
 import { SafeAreaView  } from 'react-native-safe-area-context';
 import { Feather} from '@expo/vector-icons';
 import api from '../services/api';
@@ -15,31 +15,57 @@ export default function TarefasConcluidas({ navigation }) {
     const [selectedTask, setSelectedTask] = useState(null); // Tarefa clicada
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-    // Abre o dropdown com a opção de excluir
-    const openMenu = (item) => {
+
+    useEffect(() => {
+        fetchDoneTasks();
+    }, []);
+
+
+    const fetchDoneTasks = async () => {
+        try {
+            console.log('Tentando carregar tarefas concluídas...')
+            // Rota do backend para listar tarefas concluídas
+            const response = await api.get('/tasks/tarefas/paginadas?page=0&size=50&concluido=true');
+            
+            setCompletedTasks(response.data.content || []);
+            console.log('Tarefas', response.data.content);
+            //console.log('Name user', response.data.content.user.username);
+        } catch (error) {
+            console.error(error);
+            console.error("Erro ao buscar tarefas:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Função paa restaurar tarefa (desmarcar como concluída)
+    const handleRestaurar = async (task) => {
+        try {
+            // Endpoint aceite PATCH para restaurar a tarefa concluída
+            await api.patch(`/tasks/tarefas/${task.id}/restaurar`);
+
+            setCompletedTasks(prev => prev.filter(t => t.id !== task.id));
+            Toast.show({ 
+                type: 'success',
+                text1: 'Tarefa restaurada!',
+                text2: 'A tarefa voltou para sua lista principal.',
+                visibilityTime: 3000, // Define quanto tempo o tast fica visível
+                autoHide: true, // Define se o toast some sozinho
+                topOffset: 50, // Define a distância do topo da tela
+            });
+
+        } catch (error) {
+            Toast.show({type: 'error', text1: 'Erro ao restaurar'});
+            console.log("Erro detalhado: ", error.response?.data);
+        }
+    };
+
+    const openDeleteDialog = (item) => {
         setSelectedTask(item);
-        //setMenuVisible(true);
-
-            Alert.alert(
-            "Excluir Tarefa?",
-             item.titulo,
-            [
-                { text: "Excluir", onPress: () => setIsDeleteModalVisible(true), // Abre seu modal bonitão de confirmação
-                    style: "destructive", color: "#ef4444" // No iOS fica vermelho automaticamente
-                },
-                { text: "Cancelar", style: "cancel" }
-            ],
-            { cancelable: true }
-        );
+        setIsDeleteModalVisible(true);
     };
 
-    // Dispara o processo de exclusão
-    const handleActionExcluir = () => {
-        setMenuVisible(false); // Fecha o dropdown
-        setTimeout(() => setIsDeleteModalVisible(true), 300); // Abre o modal de confirmação
-    };
-
-    // Função excluir a tarefa do usuário
+        // Função excluir a tarefa do usuário
     const deletarTarefaApi = async (id) => {
 
         if (!id) return; // Segurança extra
@@ -79,32 +105,10 @@ export default function TarefasConcluidas({ navigation }) {
         }
     };
 
-    useEffect(() => {
-        fetchDoneTasks();
-    }, []);
-
-
-    const fetchDoneTasks = async () => {
-        try {
-            console.log('Tentando carregar tarefas concluídas...')
-            // Rota do backend para listar tarefas concluídas
-            const response = await api.get('/tasks/tarefas/paginadas?page=0&size=50&concluido=true');
-            
-            setCompletedTasks(response.data.content || []);
-            console.log('Tarefas', response.data.content);
-            //console.log('Name user', response.data.content.user.username);
-        } catch (error) {
-            console.error(error);
-            console.error("Erro ao buscar tarefas:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const formatarData = (dataString) => {
-        if (!dataString) return 'Data não informada | Sem registro';
+        if (!dataString) return 'Sem registro';
         const data = new Date(dataString);
-        return `${data.toLocaleDateString('pt-BR')} ás ${data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit'})}`;
+        return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
     };
 
     const getCorPrioridade = (p) => {
@@ -117,78 +121,112 @@ export default function TarefasConcluidas({ navigation }) {
     };
 
     const renderItem = ({ item }) => (
-        <View className="bg-white p-4 mb-3 rounded-xl border border-gray-100 shadow-sm">
-            <View className={`absolute left-0 top-0 bottom-0 w-1.5 ${getCorPrioridade(item.prioridade)}`}/>
-                {/* Botão de Opções */}
-                <TouchableOpacity
-                onPress={() => openMenu(item)} // Passa o item todo para o estado
-                    className="absolute right-2 top-2 top-2 p-2 z-10"
-                >
-                    <Feather name='more-vertical' size={20} color="#4b5563" />
-                </TouchableOpacity>
-                <View className="flex-row items-center mb-2 pr-6">
-                    <Feather name="check-circle" size={20} color="#16a34a" />
-                    <Text className="ml-2 text-base font-bold text-gray-800 line-through">
-                        {item.titulo}
-                    </Text>
-                </View>
+        <Pressable
+            style={({ pressed }) => [
+                { transform: [{ scale: pressed ? 0.98 : 1 }] }
+            ]}
+            className="bg-white mx-3 mb-4 rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+        >
+                <View 
+                    style={{ backgroundColor: getCorPrioridade(item.prioridade) === 'bg-red-500' ? '#ef4444' : 
+                                       getCorPrioridade(item.prioridade) === 'bg-yellow-500' ? '#eab308' : 
+                                       getCorPrioridade(item.prioridade) === 'bg-blue-500' ? '#3b82f6' : '#d1d5db' }}
+            className="absolute left-0 top-0 bottom-0 w-2"
+                    />
+                    <View className="p-5 flex-row items-center justify-between">
+                        <View className="flex-row items-center flex-1">
+                        {/* Check ícone decorativo */}
+                        <View className="bg-green-100 p-3 rounded-full">
+                            <Feather name='check' size={18} color="#16a34a" />
+                        </View>
+                    
+                        {/* Conteúdo central */}
+                        <View className="ml-4 flex-1 pr-2">
+                            <Text
+                                numberOfLines={1}
+                                className="text-gray-400 font-medium text-lg line-through leading-tight">
+                                {item.titulo}
+                            </Text>
+                            <View className="flex-row items-center mt-2">
+                                <Feather name='calendar' size={12} color="#9ca3af" />
+                                <Text className="text-xs text-gray-400 ml-1.5 font-medium" >
+                                    {formatarData(item.updatedAt)}
+                                </Text>
+                            </View>
+                            </View>
+                        </View>
 
-            <View className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                 <View className="flex-row items-center">
-                    <Feather name="clock" size={14} color="#6b7280" />
-                    <Text className="ml-2 text-xs text-gray-500">
-                        Concluído: <Text className="fong-semibold text-gray-700">{formatarData(item.updatedAt)}</Text>
-                    </Text>
+                        {/* Ações do Card */}
+                        <View className="flex-row items-center">
+                        {/* Botão Restaurar */}
+                        <TouchableOpacity 
+                            onPress={() => handleRestaurar(item)}
+                            className="p-3 bg-blue-50 rounded-2xl mr-2 active:bg-blue-100"
+                        >
+                            <Feather name='rotate-ccw' size={20} color="#3b82f6" />
+                        </TouchableOpacity>
+
+                        {/* Botão Excluir */}
+                        <TouchableOpacity
+                            onPress={() => openDeleteDialog(item)}
+                            className="p-3 bg-red-50 rounded-2xl active:bg-red-100"
+                        >
+                            <Feather name='trash-2' size={20} color="#ef4444" />
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
-        </View>
+        </Pressable>
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <SafeAreaView className="flex-1 bg-gray-50/50">
             {/* Header Manual */}
-            <View className="bg-white p-4 flex-row items-center border-b border-gray-100">
-                <TouchableOpacity onPress={() => navigation.goBack()} className="p-2">
-                    <Feather name='arrow-left' size={24} color="#1f2937" />
+            <View className="bg-white p-4 py-4 flex-row items-center border-b border-gray-100 shadow-sm">
+                <TouchableOpacity 
+                    onPress={() => navigation.goBack()} 
+                    className="bg-gray-50 p-2 rounded-full">
+                    <Feather name='arrow-left' size={22} color="#1f2937" />
                 </TouchableOpacity>
-                <Text className="text-lg font-bold ml-2 text-gray-800">Registro de Atividades</Text>
+                <View className="ml-3">
+                    <Text className="text-lg font-bold text-gray-800">Registro de Atividades</Text>
+                    <Text className="text-xs text-gray-500">{completedTasks.length} tarefas finalizadas</Text>
+                </View>
             </View>
 
-            <View className="flex-1 p-4">
+            <View className="flex-1">
                 {loading ? (
-                    <ActivityIndicator size="large" color="#16a34a" className="mt-10" />
+                    <View className="flex-1 justify-center">
+                        <ActivityIndicator size="large" color="#16a34a" />
+                    </View>
                 ) : (
                     <FlatList 
-                    data={completedTasks}
-                     keyExtractor={(item) => item.id.toString()}
-                     renderItem={renderItem}
-                     ListEmptyComponent={
-                        // Container estilizado para a lista vazia
-                        <View className="items-center justify-center mt-20 px-10">
-                            <View className="bg-green-50 p-6 rounded-full mb-4">
-                                <Feather name='check-circle' size={80} color="#16a34a" />
+                        data={completedTasks}
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={renderItem}
+                        contentContainerStyle={{ paddingTop: 16, paddingBottom: 100 }}
+                        ListEmptyComponent={
+                            // Container estilizado para a lista vazia
+                            <View className="items-center justify-center mt-20 px-10">
+                                <View className="bg-green-50 p-8 rounded-full mb-4">
+                                    <Feather name='archive' size={80} color="#16a34a" />
+                                </View>
+                                <Text className="text-xl font-bold text-gray-800 text-center">Tudo limpo por aqui!</Text>
+                                <Text className="text-gray-500 text-center mt-2">Você ainda não possui nenhuma tarefa concluída. Que tal finalizar algo hoje?</Text>
                             </View>
-                             <Text className="text-xl font-bold text-gray-800 text-center">Tudo limpo por aqui!</Text>
-                             <Text className="text-gray-500 text-center mt-2">Você ainda não possui nenhuma tarefa concluída. Que tal finalizar algo hoje?</Text>
-                        </View>
-                       
-                     }
-                     contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+                        }
                     />
                 )}
             </View>
            
-            <View>
                 {/* Modal de Confirmação de Exclusão */}
                 <Modal
                     visible={isDeleteModalVisible}
                     transparent={true}
-                    animationType="slide"
+                    animationType="fade"
                 >
-                    <View className="flex-1 justify-end bg-black/50">
+                    <View className="flex-1 justify-end bg-black/40">
                         <View className="bg-white rounded-t-[40px] p-8 items-center">
                             <View className="w-12 h-1.5 bg-gray-200 rounded-full mb-6"/>
-                            
                             <View className="bg-red-100 p-4 rounded-full mb-4">
                                 <Feather name="alert-triangle" size={30} color="#ef4444" />
                             </View>
@@ -208,7 +246,6 @@ export default function TarefasConcluidas({ navigation }) {
                                         Cancelar
                                     </Text>
                                 </TouchableOpacity>
-
                                 <TouchableOpacity 
                                 activeOpacity={0.8}
                                     onPress={() => {
@@ -226,7 +263,8 @@ export default function TarefasConcluidas({ navigation }) {
                         </View> 
                     </View>
                 </Modal>
-            </View>
+                
+            <Toast />
         </SafeAreaView>
     );
 }
