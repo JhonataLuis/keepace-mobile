@@ -20,7 +20,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
     const [descricao, setDescricao] = useState(existingTask?.descricao || '');
     const [categoria, setCategoria] = useState(existingTask?.categoria || '');
     const [prioridade, setPrioridade] = useState(existingTask?.prioridade || '');
-    const [status, setStatus] = useState(existingTask?.status || 'TODO'); // Inicia com o STATUS A Fazer
+    const [status, setStatus] = useState(existingTask?.status || 'TODO'); // Inicia com o STATUS A FAZER
     const [updatedAt, setUpdatedAt] = useState(existingTask?.updatedAt || new Date().toISOString());
     const [date, setDate] = useState(initialDate); // para dueDate
     const [showPicker, setShowPicker] = useState(false); // para dueDate

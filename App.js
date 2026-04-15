@@ -15,6 +15,7 @@ import CriarEditarTarefa from './src/screens/CriarEditarTarefa';
 import TarefasConcluidas from './src/screens/TarefasConcluidas';
 import MyPerfil from './src/screens/MyPerfil';
 import Register from './src/screens/Register';
+import ForgotPassword from './src/screens/ForgotPassword';
 
 const Stack = createStackNavigator();
 
@@ -40,6 +41,11 @@ function AppNavigator() {
            name="Register"
            component={Register}
            options={{ title: 'Register' }}
+          />
+          <Stack.Screen 
+            name='ForgotPassword'
+            component={ForgotPassword}
+            options={{ title: 'ForgotPassword' }}
           />
           </>
         ) : (

@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Alert, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Pressable } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isBefore, isToday, isTomorrow, startOfDay } from 'date-fns';
+
+/* IMPORTS ESSENCIAIS
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
+import Animated, { FadeInLeft, Layout } from 'react-native-reanimated';*/
+
 import api from '../services/api' // Instância do Axios
 import { useAuth } from '../services/AuthContext';
 import { Feather } from '@expo/vector-icons';
@@ -169,6 +175,7 @@ export default function ListaTarefas({ navigation }) {
         
 
         return (
+          
         <View>
                 {/* Container principal em um botão de ação editar */}
                 <Pressable 
@@ -217,10 +224,11 @@ export default function ListaTarefas({ navigation }) {
                         {/* Badge de Categoria/Prioridade */}
                         {!item.concluido && (
                             <View className="flex-row mt-2 ml-8 items-center">
-                                <Text className="text-[10px] font-medium bg-gray-100 text-gray-500 px-2 py-0.5 rounded mr-2">
-                                    {item.categoria}
-                                </Text>
-
+                                {item.categoria ? (
+                                    <Text className="text-[10px] font-medium bg-gray-100 text-gray-500 px-2 py-0.5 rounded mr-2">
+                                        {item.categoria}
+                                    </Text>
+                                ) : null }
                                 {/* Prioridade com cor de texto dinâmica */}
                                 <View className="flex-row items-center bg-gray-100 px-2 py-0.5 rounded mr-2">
                                     <View 
@@ -255,6 +263,7 @@ export default function ListaTarefas({ navigation }) {
                 </View>
             </Pressable>
         </View>
+      
         );
 };
 
@@ -432,10 +441,10 @@ export default function ListaTarefas({ navigation }) {
                     <Text className="text-[10px] text-green-600">Tarefas</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity className="items-center">
+                {/*<TouchableOpacity className="items-center">
                     <Feather name='calendar' size={24} color="#9ca3af" />
-                    <Text className="text-[10px] text-gray-500">Agenda</Text>
-                </TouchableOpacity>
+                    <Text className="text-[10px] text-gray-500">Agenda</Text> // implementar próxima versão
+                </TouchableOpacity>*/}
 
                 <TouchableOpacity
                   className="items-center"
@@ -444,7 +453,6 @@ export default function ListaTarefas({ navigation }) {
                     <Feather name='user' size={24} color="#9ca3af" />
                     <Text className="text-[10px] text-gray-500">Perfil</Text>
                 </TouchableOpacity>
-                
                 </View>
             </View>
         </SafeAreaView>

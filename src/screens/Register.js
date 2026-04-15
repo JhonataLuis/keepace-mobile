@@ -246,13 +246,15 @@ export default function Register({ navigation }) {
                 </TouchableOpacity>
             </View>
 
-            {/* Footer: Já tem conta  */}
-            <View className="flex-row justify-center mt-auto mb-10 pt-6">
-                <Text className="text-gray-500">Já possui uma conta?</Text>
-                <TouchableOpacity>
-                    <Text className="text-blue-600 font-bold">Fazer Login</Text>
-                </TouchableOpacity>
-            </View>
+                {/* Footer: Já tem conta  */}
+                <View className="flex-row justify-center mt-auto mb-10 pt-6">
+                    <Text className="text-gray-500">Já possui uma conta?</Text>
+                    <TouchableOpacity
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Text className="text-blue-600 font-bold"> Fazer Login</Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
         </SafeAreaView>
     );
