@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Pressable } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isBefore, isToday, isTomorrow, startOfDay } from 'date-fns';
+import { StatusBar } from 'expo-status-bar';
 
 // IMPORTS ESSENCIAIS PARA DRAG & D
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -225,6 +226,7 @@ export default function ListaTarefas({ navigation }) {
         return (
           
         <View>
+              <StatusBar edges={['top']} className="bg-white" />
                 {/* Container principal em um botão de ação editar */}
                 <Pressable 
                     onPressIn={() => console.log("Toucou na tarefa:", item.id)}
@@ -264,7 +266,9 @@ export default function ListaTarefas({ navigation }) {
                                         color={item.concluido ? "#9ca3af" : estiloPrioridade.check}
                                     />
                             </Pressable>
-                                <Text className={`text-lg font-semibold flex-1 ${item.concluido ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                                <Text 
+                                    numberOfLines={1}
+                                    className={`text-base font-medium flex-1 ${item.concluido ? 'line-through text-gray-400' : 'text-gray-800'}`}>
                                     {item.titulo}
                                 </Text>
                         </View>
@@ -272,7 +276,7 @@ export default function ListaTarefas({ navigation }) {
                             <Text 
                                 numberOfLines={1} // Limita a 3 linhas
                                 ellipsizeMode='tail' // Adiciona o "..." no final
-                                className={`text-sm mt-1 ml-8 ${item.concluido ? 'text-gray-400' : 'text-gray-600'}`}>
+                                className={`text-sm mt-1 ml-8 ${item.concluido ? 'text-gray-500' : 'text-gray-600'}`}>
                                 {item.descricao}
                             </Text>
                         )}
@@ -332,9 +336,6 @@ export default function ListaTarefas({ navigation }) {
             <View className="bg-white pt-12 pb-4 px-6 flex-row justify-between items-center shadow-sm z-50">
                     <Text className="text-xl font-bold text-gray-800">Minhas Tarefas</Text>
                 <View className="flex-row">
-                    {/*<TouchableOpacity className="p-2 mr-2 bg-gray-100 rounded-full">
-                        <Feather name="list" size={20} color="#4b5563" /> // Implementar próxima versão
-                    </TouchableOpacity>*/}
 
                     {/* Container do Menu */}
                     <View>
@@ -419,14 +420,14 @@ export default function ListaTarefas({ navigation }) {
             <View className="flex-1 px-2 bg-gray-50">
                 {tasks.length === 0 && !loading ? (
                     // View centralizada para estado vazio
-                    <View className="flex-1 items-center justify-center pb-20">
+                    <View className="items-center justify-center mt-20 px-10">
                         <View className="bg-blue-50 p-8 rounded-full mb-6">
                             <Feather name='clipboard' size={70} color="#3b82f6" />
                         </View>
-                        <Text className="text-2xl font-bold text-gray-800 mb-2">
+                        <Text className="text-xl font-bold text-gray-800 text-center">
                             Sua lista está vazia
                         </Text>
-                        <Text className="text-2xl">
+                        <Text className="text-gray-500 text-center mt-2">
                             Organize seu dia agora mesmo.{'\n'}
                             Toque no botão <Text className="font-bold text-blue-500"> + </Text>
                         </Text>
@@ -517,10 +518,10 @@ export default function ListaTarefas({ navigation }) {
                     <Text className="text-[10px] text-green-600">Tarefas</Text>
                 </TouchableOpacity>
 
-                {/*<TouchableOpacity className="items-center">
+                <TouchableOpacity className="items-center">
                     <Feather name='calendar' size={24} color="#9ca3af" />
-                    <Text className="text-[10px] text-gray-500">Agenda</Text> // implementar próxima versão
-                </TouchableOpacity>*/}
+                    <Text className="text-[10px] text-gray-500">Agenda</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity
                   className="items-center"

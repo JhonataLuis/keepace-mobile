@@ -111,11 +111,11 @@ export default function CriarEditarTarefa({ navigation, route }) {
                 await api.post('/tasks/tarefas', taskData);
                     Toast.show({
                         type: 'success',
-                        text1: 'Sucesso!',
-                        text2: 'Tarefa criada com sucesso',
-                        visibilityTime: 3000,
+                        text1: 'Tarefa criada com sucesso.',
+                         position: 'top',
+                        topOffset: 300,
+                        visibilityTime: 4000,
                         autoHide: true,
-                        topOffset: 50,
                     });
                 console.log("Dados sendo cadastrados:", JSON.stringify(taskData, null, 2));
             }

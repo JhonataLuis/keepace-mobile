@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../services/AuthContext';
 import { Feather } from '@expo/vector-icons';
 import api from '../services/api';
+import { StatusBar } from 'expo-status-bar';
 
 export default function Home({ navigation }) {
 
@@ -66,16 +67,31 @@ export default function Home({ navigation }) {
 
 
     return ( 
-        // SafeAreaView evita que o conteúdo fique atrás do notch/camara do celular
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <View className="flex-1 bg-gray-50">
+            {/*SafeAreaView evita que o conteúdo fique atrás do notch/camara do celular*/}
+            <SafeAreaView edges={['top']} className="bg-white" >
+                <StatusBar style="dark" backgroundColor="#ffffff" />
+            </SafeAreaView>
             {/* Header Moderno */}
             <View className="px-6 py-6 flex-row justify-between items-center bg-white border-b border-gray-100">
-                <View>
-                    <Text className="text-gray-400 text-sm font-medium">Olá,</Text>
-                    <Text className="text-2xl font-bold text-gray-800">{user?.name?.split(' ')[0] || 'Usuário'}!</Text>
+                <View className="flex-1">
+                     {/* DATA (embaixo) */}
+                    <Text className="text-gray-400 text-sm mt-1 capitalize">
+                        {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit' })}
+                    </Text>
+                    {/* LINHA: Olá + Nome */}
+                    <View className="flex-row items-center">
+                        <Text className="text-gray-500 text-sm font-medium mr-1">
+                            Olá,
+                        </Text>
+                        <Text className="text-xl font-bold text-gray-800">
+                            {user?.name?.split(' ')[0] || 'Usuário'}! 👋
+                        </Text>
+                    </View>
+        
                 </View>
                 <TouchableOpacity onPress={() => navigation.navigate('Perfil')} className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center border-2 border-blue-50">
-                    <Text className="text-blue-600 font-bold text-lg">{user?.name?.charAt(0) || 'U'}</Text>
+                    <Text className="text-blue-600 font-bold text-2xl">{user?.name?.charAt(0) || 'U'}</Text>
                 </TouchableOpacity>
             </View>
                 <ScrollView className="flex-1 px-4"
@@ -144,7 +160,7 @@ export default function Home({ navigation }) {
                     )}
 
                     {/* Seção de Ações em Grid */}
-                    <Text className="text-lg font-bold text-gray-800 mt-8 mb-4 ml-2">
+                    <Text className="text-lg font-semibold text-gray-800 mt-8 mb-4 ml-2">
                         Ações rápidas
                     </Text>
 
@@ -188,6 +204,7 @@ export default function Home({ navigation }) {
                     <View className="h-20" />
                
              </ScrollView>
-        </SafeAreaView>
+      
+        </View>
     );
 }

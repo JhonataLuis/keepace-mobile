@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Image, View, Text, TouchableOpacity, ScrollView, Switch, Modal, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../services/AuthContext';
 import Toast from 'react-native-toast-message';
 import { TextInput } from 'react-native-gesture-handler';
-
+import { StatusBar } from 'expo-status-bar';
 
 export default function Perfil({ navigation }) {
+    const insets = useSafeAreaInsets();
+
     const { user, logout } = useAuth();
     const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
     const [senhaAtual, setSenhaAtual] = useState('');
@@ -140,108 +142,120 @@ export default function Perfil({ navigation }) {
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-blue-50">
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <View className="items-center pt-8 pb-10 px-6">
-                    <View className="relative">
-                        <View className="w-24 h-24 bg-blue-600 rounded-full items-center justify-center shadow-xl shadow-blue-300 overflow-hidden border-2 border-white">
-                            {user?.profilePhoto ? (
-                                <Image
-                                 source={{ uri: `${BASE_URL}${user.profilePhoto}?t=${new Date().getTime()}` }}
-                                 className="w-full h-full rounded-full"
-                                 resizeMode='cover'
-                                />
-                            ) : (
+        <SafeAreaView className="flex-1 bg-white">
+            <StatusBar style="dark" backgroundColor="#ffffff" />
+            <View className="flex-1 bg-blue-50">
+                {/* Header com botão voltar */}
+                <View className="flex-row items-center px-4 py-3 bg-white border-b border-gray-100">
+                    <TouchableOpacity
+                        onPress={() => navigation.goBack()}
+                        className="bg-gray-100 p-2 rounded-full"
+                    >
+                        <Feather name='arrow-left' size={22} color="#1f2937" />
+                    </TouchableOpacity>
+                    <Text className="ml-3 text-lg font-bold text-gray-800">Perfil</Text>
+                </View>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    <View className="items-center pt-8 pb-10 px-6">
+                        <View className="relative">
+                            <View className="w-24 h-24 bg-blue-600 rounded-full items-center justify-center shadow-xl shadow-blue-300 overflow-hidden border-2 border-white">
+                                {user?.profilePhoto ? (
+                                    <Image
+                                    source={{ uri: `${BASE_URL}${user.profilePhoto}?t=${new Date().getTime()}` }}
+                                    className="w-full h-full rounded-full"
+                                    resizeMode='cover'
+                                    />
+                                ) : (
 
-                                <Text className="text-white text-3xl font-bold">
-                                    {user?.name?.charAt(0).toUpperCase() || 'U'}
-                                </Text>
-                            )}
+                                    <Text className="text-white text-3xl font-bold">
+                                        {user?.name?.charAt(0).toUpperCase() || 'U'}
+                                    </Text>
+                                )}
 
+                            </View>
+                            <TouchableOpacity 
+                                className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md border border-gray-50"
+                                onPress={() => handleCommingSoon('Troca de foto')}
+                                >
+                                <Feather name='camera' size={16} color="#3b82f6" />
+                            </TouchableOpacity>
                         </View>
-                        <TouchableOpacity 
-                            className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md border border-gray-50"
-                            onPress={() => handleCommingSoon('Troca de foto')}
-                            >
-                            <Feather name='camera' size={16} color="#3b82f6" />
-                        </TouchableOpacity>
+                        <Text className="text-2xl font-bold text-gray-800 mt-4">{user?.name || 'Usuário'}</Text>
+                        <Text className="text-gray-500">{user?.email || 'email@exemplo.com'}</Text>
                     </View>
-                    <Text className="text-2xl font-bold text-gray-800 mt-4">{user?.name || 'Usuário'}</Text>
-                    <Text className="text-gray-500">{user?.email || 'email@exemplo.com'}</Text>
-                </View>
-            
+                
 
-            {/* Seção: Conta */}
-            <View className="px-6 mb-6">
-                <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Minha Conta</Text>
-            
-                    <View className="bg-white rounded-3xl px-4 shadow-sm border border-blue-50">
-                        <MenuOption 
-                            icon="user"
-                            title="Conta"
-                            subtitle="Editar nome e informações"
-                            isComingSoon={true} 
-                        />
+                {/* Seção: Conta */}
+                <View className="px-6 mb-6">
+                    <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Minha Conta</Text>
+                
+                        <View className="bg-white rounded-3xl px-4 shadow-sm border border-blue-50">
+                            <MenuOption 
+                                icon="user"
+                                title="Conta"
+                                subtitle="Editar nome e informações"
+                                isComingSoon={true} 
+                            />
 
-                        <MenuOption 
-                            icon="lock"
-                            title="Segurança"
-                            subtitle="Alterar senha e privacidade"
-                            onPress={() => setIsPasswordModalVisible(true)} // Abre o Modal
-                        />
+                            <MenuOption 
+                                icon="lock"
+                                title="Segurança"
+                                subtitle="Alterar senha e privacidade"
+                                onPress={() => setIsPasswordModalVisible(true)} // Abre o Modal
+                            />
 
-                        <MenuOption 
-                            icon="bell"
-                            title="Notificações"
-                            subtitle="Configurar lembretes de tarefas"
-                            isLast={true}
-                            isComingSoon={true}
-                        />
-                    </View>
-                </View>
-
-                {/* Seção: App & Preferências  */}
-                <View className="px-5 mb-6">
-                    <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Preferências</Text>
-                    <View className="bg-white rounded-3xl px-4 shadow-sm border border-blue-100">
-                        {/* Modo Escuro (Visual Desabilitado) */}
-                        <View className="flex-row items-center py-4 border-b border-gray-100 opacity-50">
-                            <View className="bg-blue-100 p-2 rounded-lg">
-                                <Feather name='moon' size={20} color="#3b82f6" />
-                            </View>
-                            <View className="flex-1 ml-4">
-                                <Text className="text-base font-semibold text-gray-700">Modo Escuro</Text>
-                            </View>
-                            <Switch 
-                                disabled={true}
-                                trackColor={{ false: "#d1d5db", true: "#bfdbfe" }}
-                                thumbColor="#f4f3f4"
+                            <MenuOption 
+                                icon="bell"
+                                title="Notificações"
+                                subtitle="Configurar lembretes de tarefas"
+                                isLast={true}
+                                isComingSoon={true}
                             />
                         </View>
-                        <MenuOption 
-                            icon="help-circle"
-                            title="Ajuda & Suporte"
-                            isLast={true}
-                            isComingSoon={true}
-                        />
                     </View>
-                </View>
 
-                {/* Botão de Sair */}
-                <View className="px-6 mb-12">
-                    <TouchableOpacity
-                        onPress={logout}
-                        className="bg-red-50 flex-row items-center justify-center p-4 rounded-2xl border border-red-100"
-                    >
-                        <Feather name='log-out' size={20} color="#ef4444" />
-                        <Text className="ml-2 text-red-500 font-bold text-lg">Encerrar sessão</Text>
-                    </TouchableOpacity>
-                        <Text className="text-center text-gray-300 text-[10px] mt-6 tracking-tighter">
-                            KeePace v1.0.0
-                        </Text>
-                </View>
-            </ScrollView>
+                    {/* Seção: App & Preferências  */}
+                    <View className="px-5 mb-6">
+                        <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Preferências</Text>
+                        <View className="bg-white rounded-3xl px-4 shadow-sm border border-blue-100">
+                            {/* Modo Escuro (Visual Desabilitado) */}
+                            <View className="flex-row items-center py-4 border-b border-gray-100 opacity-50">
+                                <View className="bg-blue-100 p-2 rounded-lg">
+                                    <Feather name='moon' size={20} color="#3b82f6" />
+                                </View>
+                                <View className="flex-1 ml-4">
+                                    <Text className="text-base font-semibold text-gray-700">Modo Escuro</Text>
+                                </View>
+                                <Switch 
+                                    disabled={true}
+                                    trackColor={{ false: "#d1d5db", true: "#bfdbfe" }}
+                                    thumbColor="#f4f3f4"
+                                />
+                            </View>
+                            <MenuOption 
+                                icon="help-circle"
+                                title="Ajuda & Suporte"
+                                isLast={true}
+                                isComingSoon={true}
+                            />
+                        </View>
+                    </View>
 
+                    {/* Botão de Sair */}
+                    <View className="px-6 mb-12">
+                        <TouchableOpacity
+                            onPress={logout}
+                            className="bg-red-50 flex-row items-center justify-center p-4 rounded-2xl border border-red-100"
+                        >
+                            <Feather name='log-out' size={20} color="#ef4444" />
+                            <Text className="ml-2 text-red-500 font-bold text-lg">Encerrar sessão</Text>
+                        </TouchableOpacity>
+                            <Text className="text-center text-gray-300 text-[10px] mt-6 tracking-tighter">
+                                KeePace v1.0.0
+                            </Text>
+                    </View>
+                </ScrollView>
+            </View>
             {/* Modal de Alterar Senha (Bottom Sheet) */}
             <Modal
                 animationType='slide'
@@ -258,7 +272,10 @@ export default function Perfil({ navigation }) {
                         onPress={() => !loading && setIsPasswordModalVisible(false)}
                     />
 
-                    <View className="bg-white rounded-t-[40px] p-8 shadow-2xl" style={{ minHeight: '65%' }}>
+                    <View className="bg-white rounded-t-[40px] p-8 shadow-2xl" 
+                        style={{ minHeight: '65%',
+                            paddingBottom: insets.bottom > 0 ? insets.bottom : 20
+                         }}>
                        {/* "Handle" visual no topo do modal  */}
                         <View className="w-12 h-1.5 bg-gray-200 rounded-full self-center mb-8"/>
                         

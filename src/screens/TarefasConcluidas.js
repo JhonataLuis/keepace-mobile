@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { StatusBar } from 'expo-status-bar';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Alert, Pressable } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets  } from 'react-native-safe-area-context';
 import { Feather} from '@expo/vector-icons';
@@ -178,7 +179,9 @@ export default function TarefasConcluidas({ navigation }) {
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50/50">
+       
+        <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+             <StatusBar edges={['top']} className="bg-white" />
             {/* Header Manual */}
             <View className="bg-white p-4 py-4 flex-row items-center border-b border-gray-100 shadow-sm">
                 <TouchableOpacity 
@@ -187,8 +190,12 @@ export default function TarefasConcluidas({ navigation }) {
                     <Feather name='arrow-left' size={22} color="#1f2937" />
                 </TouchableOpacity>
                 <View className="ml-3">
-                    <Text className="text-lg font-bold text-gray-800">Registro de Atividades</Text>
-                    <Text className="text-xs text-gray-500">{completedTasks.length} tarefas finalizadas</Text>
+                    <Text className="text-xl font-bold text-gray-800">Registro de Atividades</Text>
+                    {completedTasks.length > 0 && (
+                        <Text className="text-xs text-gray-500">
+                            {completedTasks.length} {completedTasks.length === 1 ? 'tarefa finalizada' : 'tarefas finalizadas'}
+                        </Text>
+                    )}
                 </View>
             </View>
 
