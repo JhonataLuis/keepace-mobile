@@ -178,7 +178,7 @@ export default function Perfil({ navigation }) {
                     <View className="bg-white rounded-3xl px-4 shadow-sm border border-blue-50">
                         <MenuOption 
                             icon="user"
-                            title="Dados Pessoais"
+                            title="Conta"
                             subtitle="Editar nome e informações"
                             isComingSoon={true} 
                         />
@@ -234,7 +234,7 @@ export default function Perfil({ navigation }) {
                         className="bg-red-50 flex-row items-center justify-center p-4 rounded-2xl border border-red-100"
                     >
                         <Feather name='log-out' size={20} color="#ef4444" />
-                        <Text className="ml-2 text-red-500 font-bold text-lg">Sair da Conta</Text>
+                        <Text className="ml-2 text-red-500 font-bold text-lg">Encerrar sessão</Text>
                     </TouchableOpacity>
                         <Text className="text-center text-gray-300 text-[10px] mt-6 tracking-tighter">
                             KeePace v1.0.0

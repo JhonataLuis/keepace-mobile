@@ -3,10 +3,9 @@ import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Pressable } 
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isBefore, isToday, isTomorrow, startOfDay } from 'date-fns';
 
-/* IMPORTS ESSENCIAIS
+// IMPORTS ESSENCIAIS PARA DRAG & D
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
-import Animated, { FadeInLeft, Layout } from 'react-native-reanimated';*/
+import DragList from 'react-native-draglist';
 
 import api from '../services/api' // Instância do Axios
 import { useAuth } from '../services/AuthContext';
@@ -89,6 +88,29 @@ export default function ListaTarefas({ navigation }) {
         return { container: 'bg-purple-100', text: 'text-purple-500', icone: 'calendar' };
     };
 
+    // Função para atualizar ordem quando arrastar a tarefa
+    const atualizarOrdem = async (novaLista) => {
+        try {
+            // Monta payload pro backend
+            const payload = novaLista.map((item, index) => ({
+                tarefaId: item.id,
+                posicao: index
+            }));
+
+            await api.patch("/tasks/tarefas/reordenar", payload);
+
+            Toast.show({
+                type: 'success',
+                text1: 'Ordem alterada.',
+                position: 'top',
+                topOffset: 300,
+                visibilityTime: 3000,
+            });
+        } catch (error) {
+            console.log("Erro ao salvar ordem", error);
+        }
+    };
+
     // Função para recarregar dados quando usuário arrastar o dedo na tela para baixo
     const onRefresh = async () => {
         setRefreshing(true);
@@ -103,7 +125,7 @@ export default function ListaTarefas({ navigation }) {
             setLoading(true);
             const currentPage = isFirstLoad ? 0 : page;
 
-            const response = await api.get(`/tasks/tarefas/paginadas?page=${currentPage}&size=12&concluido=false`);
+            const response = await api.get(`/tasks/tarefas/paginadas?page=${currentPage}&size=25&concluido=false`);
             console.log("CONTEÚDO DA API:", JSON.stringify(response.data.content, null, 2));
             
             const newTasks = response.data?.content || [];
@@ -134,10 +156,34 @@ export default function ListaTarefas({ navigation }) {
     }
 };
 
+    // Função para des-concluir tarefa
+    const desfazerConclusao = async (task) => {
+        console.log("Tentando desfazer a tarefa ID:", task.id); // Log debug
+        try {
+            // Chama o backend para des-concluir tarefa
+            // Endpoint aceite PATCH para restaurar a tarefa concluída
+            await api.patch(`/tasks/tarefas/${task.id}/restaurar`);
+
+            // Adiciona de volta a lista local
+            setTasks(prevTask => {
+                // Verifica se a tarefa já não está lá (evita duplicados)
+                const existe = prevTask.some(t => t.id === task.id);
+                if(existe) return prevTask;
+
+                // Adiciona a tarefa de volta ao topo da lista
+                return [task, ...prevTask];
+            });
+
+            Toast.hide(); // Esconde o tast após desfazer
+        } catch (error) {
+            console.log("Erro ao desfazer", error);
+        }
+    };
+
     const toggleComplete = async (task) => {
         try {
             // Inverte o status e envia para o backend via PUT ou PATCH
-            //const updatedTask = { ...task, concluido: !task.concluido };
+            const restaurarTask = { ...task, concluido: false };
 
             await api.patch(`/tasks/tarefas/${task.id}/concluir`);
             console.log("Editando tarefa : ");
@@ -147,12 +193,14 @@ export default function ListaTarefas({ navigation }) {
             setTasks(prev => prev.filter(t => t.id !== task.id));
             //carregarTasks(true); // Recarrega apenas a primeira pagina para atualizar o status da tela
             Toast.show({
-                type: 'success',
+                type: 'undoAction', // Tipo customizado
                 text1: 'Tarefa Concluída!',
-                text2: 'Bom trabalho!.',
-                visibilityTime: 3000, // Define quanto tempo o tast fica visível
-                autoHide: true, // Define se o toast some sozinho
-                topOffset: 50, // Define a distância do topo da tela
+                position: 'top',
+                topOffset: 300,
+                visibilityTime: 4000,
+                props: {
+                    onUndo: () => desfazerConclusao(restaurarTask)
+                }
             }); 
         } catch (error) {
             console.error("Erro ao concluir tarefa.", error);
@@ -167,7 +215,7 @@ export default function ListaTarefas({ navigation }) {
         }
     };
 
-    const renderTask = ({ item }) => {
+    const renderTask = ({ item, onDragStart, isActive }) => {
 
         const chavePrioridade = item.prioridade?.toUpperCase() || 'BAIXA';
         // Fallback para 'BAIXA' se o valor for nulo ou diferente
@@ -179,10 +227,18 @@ export default function ListaTarefas({ navigation }) {
         <View>
                 {/* Container principal em um botão de ação editar */}
                 <Pressable 
+                    onPressIn={() => console.log("Toucou na tarefa:", item.id)}
+                    onLongPress={() => {
+                        console.log("Long press detectado:", item.id);
+                        onDragStart && onDragStart();
+                    }} // Segura para arrastar
+                    delayLongPress={200}
+                    disabled={isActive}
                     activeOpacity={0.8}
                     onPress={() => navigation.navigate('CriarEditarTarefa', { task: item })}
                     style={({ pressed }) => [
                         {
+                            opacity: isActive ? 0.8 : 1,
                             borderLeftColor: item.concluido ?  '#d1d5db' : estiloPrioridade.check,
                             backgroundColor: pressed ? '#e5e7eb' : '#ffffff', // Efeito: cinza claro ao clicar
                             transform: [{ scale: pressed ? 0.98 : 1 }], // Efeito: encolhe levemente ao clicar
@@ -268,7 +324,8 @@ export default function ListaTarefas({ navigation }) {
 };
 
     return (
-        // SafeAreaView no topo garante que o Header não fique embaixo da câmera/relogio
+        <GestureHandlerRootView style={{ flex: 1 }}>
+        {/*SafeAreaView no topo garante que o Header não fique embaixo da câmera/relogio*/}
         <SafeAreaView className="flex-1 bg-white" edges={['top']}>
         <View className="flex-1 bg-gray-100">
             {/* Header fixo */}
@@ -369,16 +426,35 @@ export default function ListaTarefas({ navigation }) {
                         <Text className="text-2xl font-bold text-gray-800 mb-2">
                             Sua lista está vazia
                         </Text>
-                        <Text>
+                        <Text className="text-2xl">
                             Organize seu dia agora mesmo.{'\n'}
                             Toque no botão <Text className="font-bold text-blue-500"> + </Text>
                         </Text>
                     </View>
                 ) : (
-                    <FlatList
+                    <DragList
                         data={tasks}
-                        renderItem={renderTask}
-                        keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={({ item, onDragStart, isActive }) =>
+                            renderTask({ item, onDragStart, isActive })
+                        }
+                            onDragBegin={() => console.log("COMEÇOU DRAG")}
+                            onReordered={( fromIndex, toIndex ) => {
+                                console.log("Terminou Drag", { fromIndex, toIndex });
+                                const updated = [...tasks];
+                                const movedItem = updated.splice(fromIndex, 1)[0];
+                                updated.splice(toIndex, 0, movedItem);
+
+                                // Atualiza UI imediatamente (UX rápida)
+                                setTasks(updated);
+
+                                // Salva no backend
+                                atualizarOrdem(updated);
+
+                            }}
+                            activationDistance={10}
+                            
+                        //keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
                         contentContainerStyle={{ paddingTop: 16, paddingBottom: 150 }}
 
                         // Para atualizar pagina e recarregar os dados quando arrastar o dedo na tela mobile
@@ -456,6 +532,7 @@ export default function ListaTarefas({ navigation }) {
                 </View>
             </View>
         </SafeAreaView>
+        </GestureHandlerRootView>
     );
 }
 

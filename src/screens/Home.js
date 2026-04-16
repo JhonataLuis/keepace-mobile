@@ -139,7 +139,6 @@ export default function Home({ navigation }) {
                                 className="mt-4 bg-blue-600 px-6 py-2 rounded-full items-center"
                             >
                                 <Feather name='plus' size={20} color="white" />
-                                <Text className="text-white font-bold">Criar Agora</Text>
                             </TouchableOpacity>
                         </View>
                     )}

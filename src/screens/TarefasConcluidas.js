@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Alert, Pressable } from 'react-native';
-import { SafeAreaView  } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets  } from 'react-native-safe-area-context';
 import { Feather} from '@expo/vector-icons';
 import api from '../services/api';
 import Toast from 'react-native-toast-message';
-//import { userAuth } from '../services/AuthContext';
 
 export default function TarefasConcluidas({ navigation }) {
+    const insets = useSafeAreaInsets();
 
-    //const [user] = userAuth();
     const [completedTasks, setCompletedTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [menuVisible, setMenuVisible] = useState(false);
@@ -48,10 +47,10 @@ export default function TarefasConcluidas({ navigation }) {
             Toast.show({ 
                 type: 'success',
                 text1: 'Tarefa restaurada!',
-                text2: 'A tarefa voltou para sua lista principal.',
+                position: 'top',
+                topOffset: 300,
                 visibilityTime: 3000, // Define quanto tempo o tast fica visível
                 autoHide: true, // Define se o toast some sozinho
-                topOffset: 50, // Define a distância do topo da tela
             });
 
         } catch (error) {
@@ -80,12 +79,12 @@ export default function TarefasConcluidas({ navigation }) {
             setCompletedTasks(prevTasks => prevTasks.filter(task => task.id !== id));
 
             Toast.show({ 
-                type: 'success',
-                text1: 'Sucesso!',
-                text2: 'A tarefa foi removida permanentemente.',
-                visibilityTime: 3000, // Define quanto tempo o tast fica visível
+                type: 'delete',
+                text1: 'Tarefa removida!',
+                position: 'top',
+                topOffset: 300,
+                visibilityTime: 4000,  // Define quanto tempo o tast fica visível
                 autoHide: true, // Define se o toast some sozinho
-                topOffset: 50, // Define a distância do topo da tela
             });
         } catch (error) {
             console.error("Erro ao deletar:", error);
@@ -225,7 +224,8 @@ export default function TarefasConcluidas({ navigation }) {
                     animationType="fade"
                 >
                     <View className="flex-1 justify-end bg-black/40">
-                        <View className="bg-white rounded-t-[40px] p-8 items-center">
+                        <View className="bg-white rounded-t-[40px] p-8 items-center"
+                            style={{ paddingBottom: insets.bottom > 0 ? insets.bottom : 20 }}>
                             <View className="w-12 h-1.5 bg-gray-200 rounded-full mb-6"/>
                             <View className="bg-red-100 p-4 rounded-full mb-4">
                                 <Feather name="alert-triangle" size={30} color="#ef4444" />
@@ -263,8 +263,6 @@ export default function TarefasConcluidas({ navigation }) {
                         </View> 
                     </View>
                 </Modal>
-                
-            <Toast />
         </SafeAreaView>
     );
 }
