@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform
 import api from '../services/api';
 import Toast from 'react-native-toast-message';
 import { Feather } from '@expo/vector-icons';
+import { Keyboard } from 'react-native';
 
 export default function ForgotPassword({ navigation }) {
     const [email, setEmail] = useState('');
@@ -17,26 +18,53 @@ export default function ForgotPassword({ navigation }) {
     const isFormValid = isEmailValid(email);
 
     const handleSendEmail = async () => {
+        console.log("Iniciando forgot-password...");
         if (!isFormValid) return;
+
+        Keyboard.dismiss(); // Para fechar o teclado ao clicar no botão 'enviar'
 
         try {
             setLoading(true);
 
-            await api.post('', { email });
+            await api.post('/auth/forgot-password', { email });
             Toast.show({ 
                 type: 'success',
                 text1: 'Sucesso!',
                 text2: 'Verifique o seu e-mail para obeter o token.'
             })
+            console.log("NAVEGANDO: ", navigation.getState());
             navigation.navigate('ResetPassword', { email }); // Vai para a próxima 
 
         } catch (error) {
             console.log("Erro: ", error);
-            Alert.alert('Erro', 'E-mail não encontrado.')
+            Toast.show({
+
+                type: 'error',
+                text1: 'Erro',
+                text2: 'Email não encontrdo',
+            });
+
+            if (error.response) {
+                // O servidor respondeu com um status fora do range 2xx
+                console.log("Dados do Erro:", error.response.data);
+                console.log("Status do Erro:", error.response.status);
+            } else if (error.request) {
+                // A requisição foi feita mas não houve resposta (Problema de IP/Rede)
+                console.log("Erro na Requisição (Sem resposta):", error.request);
+                Alert.alert("Erro de Conexão", "Não foi possível alcançar o servidor. Verifique o IP da API.");
+            } else {
+                console.log("Erro Geral:", error.message);
+            }
+            
+            Toast.show({
+                type: 'error', // Corrigido de 'erro' para 'error'
+                text1: 'Erro',
+                text2: 'Não foi possível processar a solicitação.',
+            });
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     return (
         <KeyboardAvoidingView

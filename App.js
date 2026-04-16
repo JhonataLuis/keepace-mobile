@@ -16,6 +16,7 @@ import TarefasConcluidas from './src/screens/TarefasConcluidas';
 import MyPerfil from './src/screens/MyPerfil';
 import Register from './src/screens/Register';
 import ForgotPassword from './src/screens/ForgotPassword';
+import ResetPassword from './src/screens/ResetPassword';
 
 const Stack = createStackNavigator();
 
@@ -33,19 +34,24 @@ function AppNavigator() {
           // Rotas não autenticadas
           <>
           <Stack.Screen 
-           name="Login"
-           component={Login}
-           /*options={{ headerShown: false }}*/
+            name="Login"
+            component={Login}
+            /*options={{ headerShown: false }}*/
           />
           <Stack.Screen 
-           name="Register"
-           component={Register}
-           options={{ title: 'Register' }}
+            name="Register"
+            component={Register}
+            options={{ title: 'Register' }}
           />
           <Stack.Screen 
             name='ForgotPassword'
             component={ForgotPassword}
             options={{ title: 'ForgotPassword' }}
+          />
+          <Stack.Screen 
+            name='ResetPassword'
+            component={ResetPassword}
+            options={{ title: 'ResetPassword' }}
           />
           </>
         ) : (
