@@ -42,11 +42,12 @@ export default function Register({ navigation }) {
             // Validações básicas
             if (!userName || !email || !password) {
             Toast.show({
-                    type: 'error',
-                    text1: 'Erro',
-                    text2: 'Por favor, preencha todos os campos.',
-                    position: 'top',
-                    visibilityTime: 3000
+                type: 'error',
+                text1: 'Erro',
+                text2: 'Por favor, preencha todos os campos.',
+                visibilityTime: 3000, // Define quanto tempo o tast fica visível
+                autoHide: true, // Define se o toast some sozinho
+                topOffset: 50, // Define a distância do topo da tela
             });
                 return;
             }
@@ -57,6 +58,9 @@ export default function Register({ navigation }) {
                     type: 'error',
                     text1: 'E-mail inválido',
                     text2: 'Por favor, insira um e-mail com formato válido',
+                    visibilityTime: 3000, // Define quanto tempo o tast fica visível
+                    autoHide: true, // Define se o toast some sozinho
+                    topOffset: 50, // Define a distância do topo da tela
                 });
                 return;
             }
@@ -67,7 +71,9 @@ export default function Register({ navigation }) {
                     type: 'error',
                     text1: 'Senha Fraca',
                     text2: 'A senha deve ter no mínimo 8 caracteres, incluindo letras, números e caracter especial.',
-                    visibilityTime: 4000
+                    visibilityTime: 4000, // Define quanto tempo o tast fica visível
+                    autoHide: true, // Define se o toast some sozinho
+                    topOffset: 50, // Define a distância do topo da tela
                 });
                 return;
             }
@@ -78,7 +84,9 @@ export default function Register({ navigation }) {
                     text1: 'Erro',
                     text2: 'As senhas não coincidem.',
                     position: 'top',
-                    visibilityTime: 3000
+                    visibilityTime: 3000, // Define quanto tempo o tast fica visível
+                    autoHide: true, // Define se o toast some sozinho
+                    topOffset: 50, // Define a distância do topo da tela
                 });
                 return;
             }
@@ -100,30 +108,41 @@ export default function Register({ navigation }) {
                     type: 'success',
                     text1: 'Sucesso!',
                     text2: 'Sua conta foi criada com sucesso.',
-                    position: 'top',
-                    visibilityTime: 3000,
+                    visibilityTime: 3000, // Define quanto tempo o tast fica visível
+                    autoHide: true, // Define se o toast some sozinho
+                    topOffset: 50, // Define a distância do topo da tela
                     onHide: () => navigation.navigate('Login')
                 });
 
-            //console.log("usuário new: ", response.data.content);
-        } catch (error) {
-            console.log(error);
-            const mensagem = error.response?.data?.message || "Não foi possível realizar o cadastro.";
-            Alert.alert("Erro no cadastro", mensagem);
-            console.log("--- ERRO DETALHADO ---");
-            if (error.response) {
-                // O servidor respondeu com um status fora de 2xx
-                console.log("Dados:", error.response.data);
-                console.log("Status:", error.response.status);
-            } else if (error.request) {
-                // A requisição foi feita mas não houve resposta (Erro de Rede/IP)
-                console.log("A requisição foi feita, mas o servidor não respondeu. Verifique o IP e o Firewall.");
-            } else {
-                console.log("Erro ao configurar requisição:", error.message);
-            }
-            Alert.alert("Erro", "Verifique sua conexão com o servidor.");
-        } finally {
-            setLoading(false);
+            } catch (error) {
+                console.log("--- ERRO DETALHADO ---");
+                
+                // 1. Extrai a mensagem vinda do Backend (Email already exists)
+                // Usamos o encadeamento opcional (?.) para evitar erros caso o objeto não exista
+                const mensagemErro = error.response?.data?.message || "Não foi possível realizar o cadastro.";
+
+                // 2. Exibe o Toast de erro com a mensagem específica
+                Toast.show({
+                    type: 'error',
+                    text1: 'Erro no cadastro',
+                    text2: mensagemErro, // Aqui aparecerá "Email already exists"
+                    visibilityTime: 5000,
+                    autoHide: true,
+                    topOffset: 50,
+                });
+
+                // Logs para depuração no terminal
+                if (error.response) {
+                    console.log("Status do Servidor:", error.response.status);
+                    console.log("Mensagem do Servidor:", error.response.data.message);
+                } else if (error.request) {
+                    console.log("O servidor não respondeu. Verifique a conexão.");
+                } else {
+                    console.log("Erro inesperado:", error.message);
+                }
+
+            } finally {
+                setLoading(false);
         }
     };
 

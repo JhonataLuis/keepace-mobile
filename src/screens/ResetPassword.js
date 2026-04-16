@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import api from '../services/api';
+import Toast from 'react-native-toast-message';
 
 export default function ResetPassword({ navigation }) {
     const [token, setToken] = useState(''); // Aqui o usuário digita os 6 digitos
@@ -8,8 +9,16 @@ export default function ResetPassword({ navigation }) {
     const [loading, setLoading] = useState(false);
 
     const handleReset = async () => {
+        // Verificação para o código com 6 digitos
         if (token.length < 6) {
-            Alert.alert("Erro", "O código deve ter 6 dígitos.");
+           Toast.show({
+                type: 'error',
+                text1: 'Erro',
+                text2: 'O código deve ter 6 dígitos.',
+                visibilityTime: 3000, // Define quanto tempo o tast fica visível
+                autoHide: true, // Define se o toast some sozinho
+                topOffset: 50, // Define a distância do topo da tela
+           });
             return;
         }
 
@@ -28,17 +37,24 @@ export default function ResetPassword({ navigation }) {
                 visibilityTime: 3000, // Define quanto tempo o tast fica visível
                 autoHide: true, // Define se o toast some sozinho
                 topOffset: 50, // Define a distância do topo da tela
+                onHide: () => navigation.navigate('Login')
 
             });
-            navigation.navigate('Login');
-        } catch (error) {
-            const msg = error.response?.data || 'Erro ao redefinir senha.';
-            Alert.alert("Erro", msg);
+            //navigation.navigate('Login');
+            } catch (error) {
+            // TRATAMENTO DE ERRO
+            console.log("Erro no reset:", error.response?.data);
+
+            // Extrai a mensagem de erro que vem do backend (java)
+            const mensagemServidor = error.response?.data?.message || 
+                                    error.response?.data || 
+                                    'Código inválido ou expirado.';
+
             Toast.show({
                 type: 'error',
-                text1: 'Erro',
-                text2: 'Código inválido ou expirado.',
-                visibilityTime: 3000, // Define quanto tempo o tast fica visível
+                text1: 'Erro ao redefinir',
+                text2: typeof mensagemServidor === 'string' ? mensagemServidor : 'Verifique os dados.',
+                visibilityTime: 4000, // Define quanto tempo o toast fica visível
                 autoHide: true, // Define se o toast some sozinho
                 topOffset: 50, // Define a distância do topo da tela
             });
@@ -61,7 +77,7 @@ export default function ResetPassword({ navigation }) {
                 className="bg-gray-100 border border-gray-300 p-4 rounded-2xl mb-4 text-center text-xl font-bold letter-spacing-10"
             />
             <TextInput 
-                placeholder="Nova Senha (mín. 6 caracteres)"
+                placeholder="Nova Senha (mín. 8 caracteres)"
                 value={newPassword}
                 onChangeText={setNewPassword}
                 secureTextEntry
@@ -77,7 +93,6 @@ export default function ResetPassword({ navigation }) {
                     ) : (
                         <Text className="text-white font-bold text-lg">Redefinir Senha</Text>
                     )}
-                <Text className="text-white text-center font-bold">Alterar Senha</Text>
             </TouchableOpacity>
         </View>
     );

@@ -30,7 +30,10 @@ export default function ForgotPassword({ navigation }) {
             Toast.show({ 
                 type: 'success',
                 text1: 'Sucesso!',
-                text2: 'Verifique o seu e-mail para obeter o token.'
+                text2: 'Verifique o seu e-mail para obeter o token.',
+                visibilityTime: 3000, // Define quanto tempo o tast fica visível
+                autoHide: true, // Define se o toast some sozinho
+                topOffset: 50, // Define a distância do topo da tela
             })
             console.log("NAVEGANDO: ", navigation.getState());
             navigation.navigate('ResetPassword', { email }); // Vai para a próxima 
@@ -42,6 +45,9 @@ export default function ForgotPassword({ navigation }) {
                 type: 'error',
                 text1: 'Erro',
                 text2: 'Email não encontrdo',
+                visibilityTime: 3000, // Define quanto tempo o tast fica visível
+                autoHide: true, // Define se o toast some sozinho
+                topOffset: 50, // Define a distância do topo da tela
             });
 
             if (error.response) {
@@ -57,7 +63,7 @@ export default function ForgotPassword({ navigation }) {
             }
             
             Toast.show({
-                type: 'error', // Corrigido de 'erro' para 'error'
+                type: 'error',
                 text1: 'Erro',
                 text2: 'Não foi possível processar a solicitação.',
             });
