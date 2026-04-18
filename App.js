@@ -17,6 +17,7 @@ import MyPerfil from './src/screens/MyPerfil';
 import Register from './src/screens/Register';
 import ForgotPassword from './src/screens/ForgotPassword';
 import ResetPassword from './src/screens/ResetPassword';
+import { Feather } from '@expo/vector-icons';
 
 const Stack = createStackNavigator();
 
@@ -53,27 +54,37 @@ const toastConfig = {
       </View>
     ),
 
-    // Toast de conclusão
-      success: ({ text1 }) => (
+    success: ({ text1, text2 }) => (
       <View
         style={{
-          height: 55,
           width: '90%',
-          backgroundColor: '#333', // Fundo escuro estilo Snackbar
+          backgroundColor: '#ECFDF5', // verde bem leve
           borderRadius: 12,
-          justifyContent: 'center',
-          paddingHorizontal: 20,
-          elevation: 10,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 5 },
-          shadowOpacity: 0.3,
-          shadowRadius: 6,
-          alignSelf: 'center'
+          padding: 14,
+          flexDirection: 'row',
+          alignItems: 'center',
+          alignSelf: 'center',
+          borderLeftWidth: 5,
+          borderLeftColor: '#10B981', // verde destaque
+          elevation: 5,
         }}
       >
-        <Text style={{ color: 'white', fontWeight: 'bold' }}>
-          {text1}
-        </Text>
+        {/* Ícone */}
+        <Feather name="check-circle" size={20} color="#10B981" style={{ marginRight: 10 }} />
+
+        {/* Textos */}
+        <View style={{ flex: 1 }}>
+          {text1 && (
+            <Text style={{ color: '#065F46', fontWeight: 'bold', fontSize: 14 }}>
+              {text1}
+            </Text>
+          )}
+          {text2 && (
+            <Text style={{ color: '#047857', fontSize: 13 }}>
+              {text2}
+            </Text>
+          )}
+        </View>
       </View>
     ),
 
@@ -98,6 +109,47 @@ const toastConfig = {
         <Text style={{ color: 'white', fontWeight: 'bold' }}>
           {text1}
         </Text>
+      </View>
+    ),
+
+    // Toast de conclusão
+      error: ({ text1, text2 }) => (
+      <View
+        style={{
+          height: 55,
+          width: '90%',
+          backgroundColor: '#FEF2F2', // Vermelho bem leve (fundo)
+          borderRadius: 12,
+          padding: 14,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          paddingHorizontal: 20,
+          elevation: 10,
+          shadowOffset: { width: 0, height: 5 },
+          shadowOpacity: 0.3,
+          shadowRadius: 6,
+          borderLeftWidth: 5,
+          borderLeftColor: '#EF4444', // vermelho forte (destaque)
+          elevation: 5,
+          alignSelf: 'center',
+          alignItems: 'center',
+        }}
+      >
+        {/* Ícone */}
+        <Feather name='alert-circle' size={20} color="#EF4444" style={{ marginRight: 10 }} />
+        {/* Textos */}
+        <View style={{ flex: 1 }}>
+          {text1 && (
+             <Text style={{ color: '#991B1B', fontWeight: 'bold', fontSize: 14 }}>
+                {text1}
+            </Text>
+          )}
+          {text2 && (
+             <Text style={{ color: '#7F1D1D', fontWeight: 'bold', fontSize: 12 }}>
+                {text2}
+            </Text>
+          )}
+        </View>
       </View>
     )
   };

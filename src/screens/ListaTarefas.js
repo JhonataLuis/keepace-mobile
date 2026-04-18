@@ -65,28 +65,28 @@ export default function ListaTarefas({ navigation }) {
 
     // Função para informar com cores sobre a data de entrega da tarefa, atrasado, hoje, amanhã
     const obterEstiloPrazo = (dataString) => {
-        if (!dataString) return { container: 'bg-gray-100', text: 'text-gray-500' };
+        if (!dataString) return { container: 'bg-gray-100', text: 'text-gray-500', icone: 'calendar', label: '' };
 
         const dataEntrega = new Date(dataString);
         const agora = new Date();
 
-        // Se o horário atual já passou da data de entrega (Independente de ser hoje ou não)
+        // Se o horário atual já passou da data de entrega (Independente de ser hoje ou não) ATRASADA
         if(isBefore(dataEntrega, agora)){
-            return { container: 'bg-red-100', text: 'text-red-600', icone: 'alert-circle' };
+            return { container: 'bg-red-100', text: 'text-red-600', icone: 'alert-circle', label: 'Atrasada ' };
         }
 
         // Se for hoje
         if (isToday(dataEntrega)) {
-            return { container: 'bg-orange-100', text: 'text-orange-600', icone: 'clock' };
+            return { container: 'bg-green-100', text: 'text-green-600', icone: 'clock', label: 'Hoje' };
         }
 
         // Se for amanhã
         if (isTomorrow(dataEntrega)) {
-            return { container: 'bg-blue-100', text: 'text-blue-600', icone: 'calendar' };
+            return { container: 'bg-blue-100', text: 'text-blue-600', icone: 'calendar', label: 'Amanhã ' };
         }
 
         // Futuro distante
-        return { container: 'bg-purple-100', text: 'text-purple-500', icone: 'calendar' };
+        return { container: 'bg-purple-100', text: 'text-purple-500', icone: 'calendar', label: ' ' };
     };
 
     // Função para atualizar ordem quando arrastar a tarefa
@@ -103,9 +103,9 @@ export default function ListaTarefas({ navigation }) {
             Toast.show({
                 type: 'success',
                 text1: 'Ordem alterada.',
-                position: 'top',
-                topOffset: 300,
                 visibilityTime: 3000,
+                autoHide: true,
+                topOffset: 300,
             });
         } catch (error) {
             console.log("Erro ao salvar ordem", error);
@@ -312,7 +312,7 @@ export default function ListaTarefas({ navigation }) {
                                         style={{ marginRight: 4 }}
                                     />
                                     <Text className={`text-[10px] font-medium ${obterEstiloPrazo(item.dueDate).text}`}>
-                                        {isToday(new Date(item.dueDate)) ? 'Hoje ' : isTomorrow(new Date(item.dueDate)) ? 'Amanhã ' : ''}
+                                        {obterEstiloPrazo(item.dueDate).label && `${obterEstiloPrazo(item.dueDate).label}`}
                                         {formatarDataExibicao(item.dueDate)}
                                     </Text>
                                 </View>

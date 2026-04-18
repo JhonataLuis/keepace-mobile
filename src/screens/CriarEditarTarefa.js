@@ -58,19 +58,9 @@ export default function CriarEditarTarefa({ navigation, route }) {
         setMode(currentMode);
     };
 
-    //
+    // Função para salvar a tarefa
     const saveTask = async () => {
-        if (!titulo.trim()) {
-            Toast.show({
-                type: 'error',
-                text1: "Campo obrigatório",
-                text2: 'O título da tarefa deve ser preenchido.',
-                visibilityTime: 3000
-            });
-            return;
-        }
-
-        setLoading(true);
+            setLoading(true);
 
         try {
             // Garantindo para LocalDateTime válido para o Spring Boot (Backend)
@@ -99,11 +89,11 @@ export default function CriarEditarTarefa({ navigation, route }) {
                 await api.put(`/tasks/tarefas/${existingTask.id}`, taskData);
                     Toast.show({
                         type: 'success',
-                        text1: 'Sucesso!',
-                        text2: 'Tarefa atualizada com sucesso!',
+                        text1: 'Tarefa atualizada',
+                        text2: 'As alterações foram salvas com sucesso',
                         visibilityTime: 3000,
                         autoHide: true,
-                        topOffset: 50, // Evita ficar colado no notch
+                        topOffset: 300, // Evita ficar colado no notch
                     });
                 console.log("Dados sendo atualizados:", JSON.stringify(taskData, null, 2));
             } else {
@@ -111,11 +101,11 @@ export default function CriarEditarTarefa({ navigation, route }) {
                 await api.post('/tasks/tarefas', taskData);
                     Toast.show({
                         type: 'success',
-                        text1: 'Tarefa criada com sucesso.',
-                         position: 'top',
-                        topOffset: 300,
+                        text1: 'Tarefa criada',
+                        text2: 'Sua tarefa foi salva com sucesso',
                         visibilityTime: 4000,
                         autoHide: true,
+                        topOffset: 300,
                     });
                 console.log("Dados sendo cadastrados:", JSON.stringify(taskData, null, 2));
             }
@@ -128,6 +118,9 @@ export default function CriarEditarTarefa({ navigation, route }) {
             setLoading(false);
         }
     };
+
+    // Declaração para quando o titulo for maior que 0 / o usuário digitar 1 caracter no campo
+    const isTituloValido = titulo.trim().length > 0;
 
     return (
         <SafeAreaView className="flex-1 bg-white">
@@ -146,7 +139,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
                             </Text>
                             <Text className="text-gray-600 font-medium mb-2 ml-1">Titulo da Tarefa</Text>
                             <TextInput
-                                className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-4 text-base text-gray-800"
+                                className={`bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-4 text-base ${isTituloValido ? 'border-gray-200' : 'border-red-300'}`}
                                 placeholder='Ex: Ir no mercado sábado de manhã'
                                 placeholderTextColor="#9ca3af"
                                 value={titulo}
@@ -249,16 +242,23 @@ export default function CriarEditarTarefa({ navigation, route }) {
                             </View>
                             
                             <TouchableOpacity
-                                className={`rounded-2xl p-4 mb-3 shadow-md ${loading ? 'bg-blue-400' : 'bg-blue-600'}`}
+                                className={`rounded-2xl p-4 mb-3 shadow-md flex-row justify-center items-center ${isTituloValido ? 'bg-blue-600' : 'bg-gray-300'}`}
                                 onPress={saveTask}
-                                disabled={loading}
+                                disabled={!isTituloValido || loading}
                             >
                                 {loading ? (
                                     <ActivityIndicator color="white" />
                                 ) : (
-                                    <Text className="text-white text-center text-lg font-bold">
-                                        {existingTask ? 'Salvar Alterações' : 'Criar Tarefa'}
-                                    </Text>
+                                    <>
+                                        <Text className="text-white text-center text-lg font-bold">
+                                            {existingTask ? 'Atualizar tarefa' : 'Criar tarefa'}
+                                        </Text>
+
+                                        {/*Ícone aparece quando estiver ativo */}
+                                        {isTituloValido && (
+                                            <Feather name='chevron-right' size={20} color="white" />
+                                        )}
+                                    </>
                                 )}
                             </TouchableOpacity>
 
