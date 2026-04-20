@@ -39,10 +39,7 @@ export default function Home({ navigation }) {
 
     useEffect(() => {
         loadStats();
-        // O listenner 'focus' atualiza os números ao voltar da tela
-       /* const unsubscribe = navigation.addListener('focus', () => {
-            loadStats();
-        });*/
+        
         return navigation.addListener('focus', loadStats);
     }, [navigation, loadStats]);
 
