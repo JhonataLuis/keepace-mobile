@@ -237,7 +237,13 @@ export default function ListaTarefas({ navigation }) {
                     delayLongPress={200}
                     disabled={isActive}
                     activeOpacity={0.8}
-                    onPress={() => navigation.navigate('CriarEditarTarefa', { task: item })}
+                    onPress={() => {
+                        // Só navega se não estiver arrastando e se a tarefa não estiver nula
+                        if (!isActive && item.id){
+                            navigation.navigate('CriarEditarTarefa', { task: item });
+                        }
+                    }}
+                        
                     style={({ pressed }) => [
                         {
                             opacity: isActive ? 0.8 : 1,

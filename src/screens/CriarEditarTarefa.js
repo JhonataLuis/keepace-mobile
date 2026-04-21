@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRoute } from '@react-navigation/native';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
@@ -9,8 +10,10 @@ import api from '../services/api'; // Instância do Axios
 import Toast from 'react-native-toast-message'; // mensagens estilizadas mais profissional
 import DateTimePicker from '@react-native-community/datetimepicker'; 
 
+
 export default function CriarEditarTarefa({ navigation, route }) {
 
+    
     const existingTask = route.params?.task;
     // Converte a string do banco para um objeto Date real se existir
     const initialDate = existingTask?.dueDate ? new Date(existingTask.dueDate) : null;
@@ -26,6 +29,59 @@ export default function CriarEditarTarefa({ navigation, route }) {
     const [showPicker, setShowPicker] = useState(false); // para dueDate
     const [mode, setMode] = useState('date'); // 'date' ou 'time' ? para dueDate
     const [loading, setLoading] = useState(false);
+    const [currentTaskId, setCurrentTaskId] = useState(route.params?.task?.id || null);
+
+
+    // Função para route pegar tarefa da notificação
+    useEffect(() => { // Route para usuário clicar na notificação e abrir a tarefa
+        let isMounted = true; // Controle para evitar atualizar estado se sair da tela
+        
+        //Função para buscar tarefa pelo id e user quando receber por notificação e clicar
+        const buscarTask = async () => {
+            const notifyId = route.params?.taskId;
+
+            // Se não tem ID, não faz nada
+            if (!notifyId) return;
+
+                console.log("Buscando tarefa da notificação ID:", notifyId);
+
+                 try {
+                    setLoading(true);
+
+                    // Chama a tarefa pelo ID
+                    const response = await api.get(`/tasks/${notifyId}`);
+
+                   if (isMounted && response.data){
+                        // Preenche os campos com os dados que vieram com o banco
+                        setTitulo(response.data.titulo);
+                        setDescricao(response.data.descricao);
+                        setCategoria(response.data.categoria || '');
+                        setPrioridade(response.data.prioridade || '');
+                        setStatus(response.data.status);
+                        setCurrentTaskId(response.data.id); // Salva o ID para que o saveTask saiba que é uma edição
+                        if (response.data.dueDate) {
+                            setDate(new Date(response.data.dueDate));
+                        }
+
+                        // LIMPEZA: Limpa o taskId para evitar loops
+                        navigation.setParams({ taskId: undefined });
+                   }
+                } catch (error) {
+                    if (isMounted) {
+                        console.error("Erro ao buscar tarefa:", error);
+                        Toast.show({ type: 'error', text1: 'Erro ao carregar tarefa' });
+                    }
+                } finally {
+                    if (isMounted) setLoading(false);
+                }
+
+        };
+
+        buscarTask();
+
+        return () => { isMounted = false; }; // Cleanup function
+
+    }, [route.params?.taskId]);
 
     //
     const onChange = (event, selectedDate) => {
@@ -84,9 +140,9 @@ export default function CriarEditarTarefa({ navigation, route }) {
                
             };
 
-            if (existingTask) {
+            if (currentTaskId) { // Verifica se temos um ID (seja da lista ou da busca)
                 // Atualizar (PUT)
-                await api.put(`/tasks/tarefas/${existingTask.id}`, taskData);
+                await api.put(`/tasks/tarefas/${currentTaskId}`, taskData);
                     Toast.show({
                         type: 'success',
                         text1: 'Tarefa atualizada',
@@ -109,11 +165,12 @@ export default function CriarEditarTarefa({ navigation, route }) {
                     });
                 console.log("Dados sendo cadastrados:", JSON.stringify(taskData, null, 2));
             }
-            navigation.navigate('ListaTarefas');
+            navigation.goBack('ListaTarefas');
         } catch (error) {
-            console.log('Erro ao salvar a tarefa:', error);
-            const msg = error.response?.data?.message || 'Não foi possível salvar a tarefa';
-            Alert.alert('Erro', msg);
+            console.log('Erro detalhado ao salvar a tarefa:', error.response?.data); // Ajuda a ver o que o Java respondeu
+            //const msg = error.response?.data?.message || 'Não foi possível salvar a tarefa';
+            Toast.show({ type: 'error', text1: 'Não foi possível salvar a tarefa'});
+            //Alert.alert('Erro', msg);
         } finally {
             setLoading(false);
         }
@@ -135,7 +192,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
                     <View className="flex-1 bg-white justify-center">
                         <View className="bg-white rounded-3xl p-6 shadow-xl">
                             <Text className="text-2xl font-bold text-gray-800 mb-6 text-center">
-                                {existingTask ? 'Editar Tarefa' : 'Nova Tarefa'}
+                                {currentTaskId ? 'Editar Tarefa' : 'Nova Tarefa'}
                             </Text>
                             <Text className="text-gray-600 font-medium mb-2 ml-1">Titulo da Tarefa</Text>
                             <TextInput
@@ -147,7 +204,10 @@ export default function CriarEditarTarefa({ navigation, route }) {
                                 maxLength={100}
                             />
 
-                            <Text className="text-gray-600 font-medium mb-2 ml-1">Categoria</Text>
+                            <Text className="text-gray-600 font-medium mb-2 ml-1">
+                                <Feather name='tag' size={20} />
+                                    Categoria
+                                </Text>
                             <View className="bg-gray-50 border border-gray-200 rounded-2xl mb-4 overflow-hidden">
                                 <Picker
                                     selectedValue={categoria}
@@ -197,7 +257,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
                            
                             <View className="mb-6">
                                 <View className="flex-row justify-between items-center mb-2 ml-1">
-                                    <Text className="text-gray-600 font-medium">Prazo de Entrega</Text>
+                                    <Text className="text-gray-600 font-medium">Data</Text>
                                     {date && (
                                         <TouchableOpacity
                                             onPress={() => setDate(null)}>
@@ -251,7 +311,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
                                 ) : (
                                     <>
                                         <Text className="text-white text-center text-lg font-bold">
-                                            {existingTask ? 'Atualizar tarefa' : 'Criar tarefa'}
+                                            {currentTaskId ? 'Atualizar tarefa' : 'Criar tarefa'}
                                         </Text>
 
                                         {/*Ícone aparece quando estiver ativo */}
