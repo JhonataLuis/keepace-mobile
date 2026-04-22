@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Pressable, Animated } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isBefore, isToday, isTomorrow, startOfDay } from 'date-fns';
 import { StatusBar } from 'expo-status-bar';
@@ -12,24 +12,37 @@ import api from '../services/api' // Instância do Axios
 import { useAuth } from '../services/AuthContext';
 import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
+import { es } from 'date-fns/locale';
 
 // Para formatar a data da entrega tarefa
 const formatarDataExibicao = (dataString) => {
-    if(!dataString) return 'Sem data';
+    if(!dataString) return '';
 
     try{
       const data = new Date(dataString);
+      const hora = data.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      if (isToday(data)) {
+        return `Hoje ${hora}`;
+      }
+
+      if (isTomorrow(data)) {
+        return `Amanhã ${hora}`;
+      }
 
       // Usando toLocaleString 
       return data.toLocaleDateString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
-        year: 'numeric',
+        /*year: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
-      });
+        minute: '2-digit'*/
+      }) + ` ${hora}`;
     } catch (e) {
-        return 'Data inválida';
+        return 'Data inválida', e;
     }
 };
 
@@ -42,6 +55,7 @@ export default function ListaTarefas({ navigation }) {
     const [loading, setLoading] = useState(false);
     const [menuVisible, setMenuVisible] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [animatingIds, setAnimatingIds] = useState([]);
     const { user } = useAuth();
 
 
@@ -57,11 +71,34 @@ export default function ListaTarefas({ navigation }) {
 
     // Ação para mudar as cores do card da tarefa conforme a prioridade
     const prioridadeCores = {
-      'BAIXA': { border: 'border-white', text: '#374151', check: '#d1d5db' }, // Branco/Cinza claro
-      'MEDIA': { border: 'border-blue-500', text: '#3b82f6', check: '#3b82f6' }, // Azul
-      'ALTA': { border: 'border-orange-500', text: '#f97316', check: '#f97316'}, // Laranja
-      'URGENTE': { border: 'border-red-600', text: '#dc2626', check: '#dc2626'}, // Vermelho
+      'BAIXA': { color: '#10B981', bg: '#D1FAE5', icon: 'arrow-down'}, // Branco/Cinza claro
+      'MEDIA': {color: '#F59E0B', bg: '#FEF3C7', icon: 'minus' }, // Azul
+      'ALTA': { color: '#F97316', bg: '#FFEDD5', icon: 'arrow-up'}, // Laranja
+      'URGENTE': { color: '#EF4444', bg: '#FEE2E2', icon: 'alert-circle'}, // Vermelho
     };
+
+    // Tags para categorias
+    const categorias = [
+        {label: 'Pessoal', value: 'PESSOAL', color: '#3B82F6', bg: '#DBEAFE',},
+        {label: 'Trabalho', value: 'TRABALHO', color: '#10B981', bg: '#EDE9FE',},
+        {label: 'Estudos', value: 'ESTUDOS', color: '#8B5CF6', bg: '#EDE9FE',},
+    ];
+
+    // Função para mostrar cor da categoria
+    const getCategoriaConfig = (categoriaValue) => {
+        return categorias.find(cat => cat.value === categoriaValue);
+    };
+
+    // Função para mostrar badge da tarefa recorrente
+    const getRecorrenciaConfig = (recorrencia) => {
+    const opcoes = [
+        { value: 'DIARIA', icon: 'sun', color: '#3b82f6', bg: '#DBEAFE', label: ' Diária' },
+        { value: 'SEMANAL', icon: 'calendar', color: '#8b5cf6', bg: '#EDE9FE', label: ' Semanal' },
+        { value: 'MENSAL', icon: 'refresh-cw', color: '#f97316', bg: '#FFEDD5', label: ' Mensal' },
+    ];
+
+    return opcoes.find(o => o.value === recorrencia);
+};
 
     // Função para informar com cores sobre a data de entrega da tarefa, atrasado, hoje, amanhã
     const obterEstiloPrazo = (dataString) => {
@@ -77,12 +114,12 @@ export default function ListaTarefas({ navigation }) {
 
         // Se for hoje
         if (isToday(dataEntrega)) {
-            return { container: 'bg-green-100', text: 'text-green-600', icone: 'clock', label: 'Hoje' };
+            return { container: 'bg-green-100', text: 'text-green-600', icone: 'clock' }; // Tem lógica acima para Hoje
         }
 
         // Se for amanhã
         if (isTomorrow(dataEntrega)) {
-            return { container: 'bg-blue-100', text: 'text-blue-600', icone: 'calendar', label: 'Amanhã ' };
+            return { container: 'bg-blue-100', text: 'text-blue-600', icone: 'calendar' }; // Tem lócia acima para Amanhã
         }
 
         // Futuro distante
@@ -186,13 +223,22 @@ export default function ListaTarefas({ navigation }) {
             // Inverte o status e envia para o backend via PUT ou PATCH
             const restaurarTask = { ...task, concluido: false };
 
+            // Marca como animado
+            setAnimatingIds(prev => [...prev, task.id]);
+
+            // Chama backend
             await api.patch(`/tasks/tarefas/${task.id}/concluir`);
             console.log("Editando tarefa : ");
 
             // Atualização Local da lista de tarefas (Optimistic Update)
             // Remove a tarefa da lista de pendentes (já que ela está concluida)
-            setTasks(prev => prev.filter(t => t.id !== task.id));
-            //carregarTasks(true); // Recarrega apenas a primeira pagina para atualizar o status da tela
+            // Espera a animação terminar
+            setTimeout(() => {
+                setTasks(prev => prev.filter(t => t.id !== task.id));
+                setAnimatingIds(prev => prev.filter(id => id !== task.id));
+            }, 300);
+
+           
             Toast.show({
                 type: 'undoAction', // Tipo customizado
                 text1: 'Tarefa Concluída!',
@@ -221,11 +267,62 @@ export default function ListaTarefas({ navigation }) {
         const chavePrioridade = item.prioridade?.toUpperCase() || 'BAIXA';
         // Fallback para 'BAIXA' se o valor for nulo ou diferente
         const estiloPrioridade = prioridadeCores[chavePrioridade] || prioridadeCores['BAIXA'];
+
+        // Para badge de tarefas recorrente
+        const recorrenciaConfig = getRecorrenciaConfig(item.recorrencia);
+        
+        // Declaração para cores da categoria
+        const categoriaConfig = getCategoriaConfig(item.categoria);
+
+        // Animação para checked
+        const isAnimating = animatingIds.includes(item.id);
+
+        const fadeAnim = new Animated.Value(1);
+        const translateX = new Animated.Value(0);
+        const scale = new Animated.Value(1);
+
+        if (isAnimating) {
+            Animated.parallel([
+                // Fade out
+                Animated.timing(fadeAnim, {
+                    toValue: 0,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+                // Slide pra direita
+                Animated.timing(translateX, {
+                    toValue: 120,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+
+                    // Bounce + shrink
+                    Animated.sequence([
+                        Animated.spring(scale, {
+                            toValue: 1.05,
+                            useNativeDriver: true,
+                        }),
+                    Animated.timing(scale, {
+                        toValue: 0.9,
+                        duration: 200,
+                        useNativeDriver: true,
+                    }),
+                ])
+            ]).start();
+        }
         
 
         return (
           
-        <View>
+        <Animated.View
+            style={{
+                opacity: fadeAnim,
+                transform: [
+                    { translateX },
+                    { scale }
+                ],
+            }}
+        >
               <StatusBar edges={['top']} className="bg-white" />
                 {/* Container principal em um botão de ação editar */}
                 <Pressable 
@@ -234,10 +331,10 @@ export default function ListaTarefas({ navigation }) {
                         console.log("Long press detectado:", item.id);
                         onDragStart && onDragStart();
                     }} // Segura para arrastar
-                    delayLongPress={200}
-                    disabled={isActive}
-                    activeOpacity={0.8}
-                    onPress={() => {
+                        delayLongPress={200}
+                        disabled={isActive}
+                        activeOpacity={0.8}
+                        onPress={() => {
                         // Só navega se não estiver arrastando e se a tarefa não estiver nula
                         if (!isActive && item.id){
                             navigation.navigate('CriarEditarTarefa', { task: item });
@@ -246,20 +343,29 @@ export default function ListaTarefas({ navigation }) {
                         
                     style={({ pressed }) => [
                         {
-                            opacity: isActive ? 0.8 : 1,
-                            borderLeftColor: item.concluido ?  '#d1d5db' : estiloPrioridade.check,
-                            backgroundColor: pressed ? '#e5e7eb' : '#ffffff', // Efeito: cinza claro ao clicar
-                            transform: [{ scale: pressed ? 0.98 : 1 }], // Efeito: encolhe levemente ao clicar
+                            opacity: isActive ? 0.9 : 1,
+                            // Borda lateral
+                            borderLeftColor: item.concluido ?  '#e5e7eb' : estiloPrioridade.color,
+                            borderLeftWidth: 5,
+                            // Fundo
+                            backgroundColor: pressed ? estiloPrioridade.bg : item.concluido ? '#f9fafb' : '#ffffff', // Leve transparencia no card |  Efeito: cinza claro ao clicar
+                            // Scale (efeito toque)
+                            transform: [{ scale: pressed ? 0.97 : 1 }], // Efeito: encolhe levemente ao clicar
+                            // ANDROID (Simula glow)
+                            elevation: pressed ? 8 : 2,
+                            shadowOpacity: pressed ? 0.18 : 0.05,
+                            shadowRadius: pressed ? 8 : 3,
+                            shadowColor: item.concluido ? '#000' : estiloPrioridade.color,
                         },
                         // Classes Tailwind aqui(exceto a cor de fundo que é dinamica)
-                        { borderRadius: 12, padding: 16, marginBottom: 12, borderLeftWidth: 4 }
+                        { borderRadius: 14, paddingVertical: 12, paddingHorizontal: 10, marginBottom: 12 }
                     ]}
                     // Efeito de onda (Ripple) exclusivo para Android
                     android_ripple={{ color: '#e5e7eb' }}
                 >
                 <View className="flex-row justify-between items-start">
                     <View className="flex-1">
-                        <View className="flex-row items-center">
+                        <View className="flex-row items-center -ml-1">
                             {/* Botão checkbox para concluir (Clique no texto ou ícone) */}
                             <Pressable 
                                 onPress={() => toggleComplete(item)}
@@ -269,7 +375,7 @@ export default function ListaTarefas({ navigation }) {
                                     {/* Ícone de Checkbox com cor dinâmico  */}
                                     <Feather name={item.concluido ? "check-circle" : "circle"}
                                         size={22}
-                                        color={item.concluido ? "#9ca3af" : estiloPrioridade.check}
+                                        color={item.concluido ? "#9ca3af" : estiloPrioridade.color}
                                     />
                             </Pressable>
                                 <Text 
@@ -289,46 +395,132 @@ export default function ListaTarefas({ navigation }) {
 
                         {/* Badge de Categoria/Prioridade */}
                         {!item.concluido && (
-                            <View className="flex-row mt-2 ml-8 items-center">
-                                {item.categoria ? (
-                                    <Text className="text-[10px] font-medium bg-gray-100 text-gray-500 px-2 py-0.5 rounded mr-2">
+                            <View 
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    marginTop: 8,
+                                    marginLeft: 24,
+                                    flexWrap: 'nowrap', // Nunca quebra linha
+                                }}
+                            >
+                                {item.categoria && categoriaConfig && (
+                                    <Text 
+                                        style={{
+                                            fontSize: 10,
+                                            backgroundColor: categoriaConfig.bg,
+                                            color: categoriaConfig.color,
+                                            paddingHorizontal: 6,
+                                            paddingVertical: 3,
+                                            borderRadius: 6,
+                                            marginRight: 6,
+                                            maxWidth: 80, // limita
+                                            fontWeight: '600'
+                                        }}
+                                    >
                                         {item.categoria}
                                     </Text>
-                                ) : null }
+                                )}
                                 {/* Prioridade com cor de texto dinâmica */}
-                                <View className="flex-row items-center bg-gray-100 px-2 py-0.5 rounded mr-2">
-                                    <View 
-                                        style={{ backgroundColor: estiloPrioridade.check }}
-                                            className="w-2 h-2 rounded-full mr-1"
-                                        />
-                                    <Text 
-                                        style={{ color: estiloPrioridade.text }}
-                                        className="text-[10px] font-bold">
-                                        {chavePrioridade}
+                                <View 
+                                    style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        backgroundColor: estiloPrioridade.bg,
+                                        paddingHorizontal: 6,
+                                        paddingVertical: 3,
+                                        borderRadius: 6, 
+                                        marginRight: 6,
+                                    }}
+                                >
+                                    <Feather 
+                                        name={estiloPrioridade.icon}
+                                        size={11}
+                                        color={estiloPrioridade.color}
+                                        style={{ marginRight: 3 }}
+                                    />
+                                    <Text
+                                        style={{
+                                            fontSize: 10, // Legível
+                                            fontWeight: '600',
+                                            color: estiloPrioridade.color,
+                                        }}
+                                    >
+                                        {chavePrioridade === 'MEDIA' ? 'MÉDIA' : chavePrioridade}
                                     </Text>
                                 </View>
-                                {/* */}
+                                {/* DueDate (Prioridade Alta) */}
                                 {item.dueDate && (
-                                <View className={`flex-row items-center px-2 py-0.5 rounded ${obterEstiloPrazo(item.dueDate).container}`}>
+                                <View 
+                                    style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        maxWidth: '45%',
+                                        flexShrink: 1,
+                                        paddingHorizontal: 6,
+                                        paddingVertical: 3,
+                                        borderRadius: 6, 
+                                        overflow: 'hidden',
+                                        //marginRight: 6,
+                                    }}
+                                    className={` ${obterEstiloPrazo(item.dueDate).container}`}>
                                     <Feather 
                                         name={obterEstiloPrazo(item.dueDate).icone}
-                                        size={10}
+                                        size={11}
                                         color={obterEstiloPrazo(item.dueDate).text === 'text-red-600' ? '#dc2626' : 
                                             obterEstiloPrazo(item.dueDate).text === 'text-orange-600' ? '#ea580c' : '#6b7280'}
                                         style={{ marginRight: 4 }}
                                     />
-                                    <Text className={`text-[10px] font-medium ${obterEstiloPrazo(item.dueDate).text}`}>
-                                        {obterEstiloPrazo(item.dueDate).label && `${obterEstiloPrazo(item.dueDate).label}`}
-                                        {formatarDataExibicao(item.dueDate)}
+                                    <Text 
+                                        numberOfLines={1}
+                                        ellipsizeMode='tail'
+                                        style={{
+                                            fontSize: 10,
+                                            fontWeight: '500',
+                                            flexShrink: 1
+                                        }}
+                                        className={`${obterEstiloPrazo(item.dueDate).text}`}>
+                                            {obterEstiloPrazo(item.dueDate).label && `${obterEstiloPrazo(item.dueDate).label}`}
+                                            {formatarDataExibicao(item.dueDate)}
                                     </Text>
                                 </View>
+                                )}
+
+                                {/* Badge para tarefas recorrentes */}
+                                {recorrenciaConfig && (
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            backgroundColor: recorrenciaConfig.bg,
+                                            paddingHorizontal: 6,
+                                            paddingVertical: 3,
+                                            borderRadius: 6,
+                                            marginLeft: 3,
+                                        }}
+                                    >
+                                        <Feather
+                                            name={recorrenciaConfig.icon}
+                                            size={11}
+                                            color={recorrenciaConfig.color}
+                                            //style={{ marginRight: 3}}
+                                        />
+                                        <Text style={{ 
+                                            fontSize: 10, 
+                                            color: recorrenciaConfig.color 
+                                        }}
+                                            numberOfLines={1}
+                                            >
+                                            {recorrenciaConfig.label}
+                                        </Text>
+                                    </View>
                                 )}
                             </View>
                         )}
                     </View>
                 </View>
             </Pressable>
-        </View>
+        </Animated.View>
       
         );
 };

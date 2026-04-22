@@ -1,7 +1,3 @@
-
-// Coloque no topo do arquivo, antes dos imports
-console.log("=== INICIANDO APP ===");
-
 import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
