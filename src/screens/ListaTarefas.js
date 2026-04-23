@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Pressable, Animated } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isBefore, isToday, isTomorrow, startOfDay } from 'date-fns';
 import { StatusBar } from 'expo-status-bar';
+import { useRoute } from '@react-navigation/native';
 
 // IMPORTS ESSENCIAIS PARA DRAG & D
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -48,6 +49,40 @@ const formatarDataExibicao = (dataString) => {
 
 export default function ListaTarefas({ navigation }) {
     const insets = useSafeAreaInsets(); // Pega as medidas das bordas (notch e botões do sistema)
+    
+    // Para botões do Footer/Paginas rotas
+    const route = useRoute();
+
+    // Função para efeitos dos botões do footer
+    const getAnimStyles = (anim) => ({
+        backgroundColor: anim.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['transparent', '#DCFCE7'],
+        }),
+        color: anim.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['#9ca3af', '#16a34a'],
+        }),
+        scale: anim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [1, 1.1],
+        }),
+    });
+
+    // Animação dos botões footer
+    const homeAnim = useRef(new Animated.Value(0)).current;
+    const tarefasAnim = useRef(new Animated.Value(0)).current;
+    const agendaAnim = useRef(new Animated.Value(0)).current;
+    const perfilAnim = useRef(new Animated.Value(0)).current;
+
+    // Função para ativar a cor dos botões do footer conforme for clicado
+    const isActive = (routeName) => route.name === routeName;
+
+    // Animação dos botões footer
+    const homeStyles = getAnimStyles(homeAnim);
+    const tarefasStyles = getAnimStyles(tarefasAnim);
+    const agendaStyles = getAnimStyles(agendaAnim);
+    const perfilStyles = getAnimStyles(perfilAnim);
 
     const [tasks, setTasks] = useState([]);
     const [page, setPage] = useState(0);
@@ -69,6 +104,36 @@ export default function ListaTarefas({ navigation }) {
         return unsubscribe;
     }, [navigation]);
 
+    // Função para efeito dos botões do footer
+    useEffect(() => {
+        Animated.timing(homeAnim, {
+            toValue: isActive('Home') ? 1 : 0,
+            duration: 250,
+            useNativeDriver: false,
+        }).start();
+
+        Animated.timing(tarefasAnim, {
+            toValue: isActive('ListaTarefas') ? 1 : 0,
+            duration: 250,
+            useNativeDriver: false,
+        }).start();
+
+        Animated.timing(agendaAnim, {
+            toValue: isActive('Agenda') ? 1 : 0,
+            duration: 250,
+            useNativeDriver: false,
+        }).start();
+
+        Animated.timing(perfilAnim, {
+            toValue: isActive('Perfil') ? 1 : 0,
+            duration: 250,
+            useNativeDriver: false,
+        }).start();
+
+    }, [route.name]);
+
+
+
     // Ação para mudar as cores do card da tarefa conforme a prioridade
     const prioridadeCores = {
       'BAIXA': { color: '#10B981', bg: '#D1FAE5', icon: 'arrow-down'}, // Branco/Cinza claro
@@ -80,13 +145,20 @@ export default function ListaTarefas({ navigation }) {
     // Tags para categorias
     const categorias = [
         {label: 'Pessoal', value: 'PESSOAL', color: '#3B82F6', bg: '#DBEAFE',},
-        {label: 'Trabalho', value: 'TRABALHO', color: '#10B981', bg: '#EDE9FE',},
+        {label: 'Trabalho', value: 'TRABALHO', color: '#10B981', bg: '#D1FAE5',},
         {label: 'Estudos', value: 'ESTUDOS', color: '#8B5CF6', bg: '#EDE9FE',},
     ];
 
     // Função para mostrar cor da categoria
     const getCategoriaConfig = (categoriaValue) => {
-        return categorias.find(cat => cat.value === categoriaValue);
+        if (!categoriaValue) return null;
+
+        const normalizado = categoriaValue
+            .toString()
+            .trim()
+            .toUpperCase();
+
+        return categorias.find(cat => cat.value === normalizado) || null;
     };
 
     // Função para mostrar badge da tarefa recorrente
@@ -224,7 +296,9 @@ export default function ListaTarefas({ navigation }) {
             const restaurarTask = { ...task, concluido: false };
 
             // Marca como animado
-            setAnimatingIds(prev => [...prev, task.id]);
+            setAnimatingIds(prev => 
+                prev.includes(task.id) ? prev :  [...prev, task.id]
+            );
 
             // Chama backend
             await api.patch(`/tasks/tarefas/${task.id}/concluir`);
@@ -244,7 +318,7 @@ export default function ListaTarefas({ navigation }) {
                 text1: 'Tarefa Concluída!',
                 position: 'top',
                 topOffset: 300,
-                visibilityTime: 4000,
+                visibilityTime: 6000,
                 props: {
                     onUndo: () => desfazerConclusao(restaurarTask)
                 }
@@ -263,6 +337,8 @@ export default function ListaTarefas({ navigation }) {
     };
 
     const renderTask = ({ item, onDragStart, isActive }) => {
+        // DEBUG PARA CATEGORIA
+        console.log("CATEGORIA VINDA DA API:", item.categoria);
 
         const chavePrioridade = item.prioridade?.toUpperCase() || 'BAIXA';
         // Fallback para 'BAIXA' se o valor for nulo ou diferente
@@ -408,8 +484,8 @@ export default function ListaTarefas({ navigation }) {
                                     <Text 
                                         style={{
                                             fontSize: 10,
-                                            backgroundColor: categoriaConfig.bg,
-                                            color: categoriaConfig.color,
+                                            backgroundColor: categoriaConfig?.bg || '#E5E7EB',
+                                            color: categoriaConfig?.color || '#6B7280',
                                             paddingHorizontal: 6,
                                             paddingVertical: 3,
                                             borderRadius: 6,
@@ -417,7 +493,7 @@ export default function ListaTarefas({ navigation }) {
                                             maxWidth: 80, // limita
                                             fontWeight: '600'
                                         }}
-                                    >
+                                    > 
                                         {item.categoria}
                                     </Text>
                                 )}
@@ -703,31 +779,85 @@ export default function ListaTarefas({ navigation }) {
                  style={{ paddingBottom: insets.bottom > 0 ? insets.bottom : 15, // Se não tiver barra (gestos), usa 15px
                     height: 70 + (insets.bottom > 0 ? insets.bottom : 0)
                  }}
-                 className="absolute bottom-0 w-full bg-white flex-row justify-around items-center py-4 border-t border-gray-100 shadow-xl">
-                <TouchableOpacity
-                  className="items-center" 
-                  onPress={() => navigation.navigate('Home')}>
-                    <Feather name="home" size={24} color="#9ca3af" />
-                    <Text className="text-[10px] text-gray-500">Inicio</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity className="items-center">
-                    <Feather name="list" size={24} color="#16a34a"/>
-                    <Text className="text-[10px] text-green-600">Tarefas</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity className="items-center">
-                    <Feather name='calendar' size={24} color="#9ca3af" />
-                    <Text className="text-[10px] text-gray-500">Agenda</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className="items-center"
-                  onPress={() => navigation.navigate('Perfil')}
+                    className="absolute bottom-0 w-full bg-white flex-row justify-around items-center py-4 border-t border-gray-100 shadow-xl"
                  >
-                    <Feather name='user' size={24} color="#9ca3af" />
-                    <Text className="text-[10px] text-gray-500">Perfil</Text>
+                {/* HOME */}
+                <TouchableOpacity
+                    className="items-center" 
+                    onPress={() => navigation.navigate('Home')}
+                    className="items-center"
+                    >
+                    <Animated.View style={{ 
+                        backgroundColor: homeStyles.backgroundColor,
+                        padding: 8,
+                        borderRadius: 12,
+                        transform: [{ scale: homeStyles.scale }]
+                    }}>
+                      <Animated.View>
+                            <Feather name="home" size={24} color={isActive('Home') ? '#16a34a' : '#9ca3af'} />
+                       </Animated.View>
+                    </Animated.View>
+                   <Animated.Text style={{
+                        fontSize: 10,
+                        color: homeStyles.color
+                   }}>
+                        Início
+                   </Animated.Text>
                 </TouchableOpacity>
+                {/* TAREFAS */}
+                <TouchableOpacity 
+                    onPress={() => navigation.navigate('ListaTarefas')}
+                    className="items-center"
+                    >
+                <Animated.View style={{
+                    backgroundColor: tarefasStyles.backgroundColor,
+                    padding: 8,
+                    borderRadius: 12,
+                    transform: [{ scale: tarefasStyles.scale }]
+                }}>
+                    <Feather name="list" size={24} color={isActive('ListaTarefas') ? '#16a34a' : '#9ca3af'} />
+                </Animated.View>
+                <Animated.Text style={{ fontSize: 10, color: tarefasStyles.color }}>
+                    Tarefas
+                </Animated.Text>
+                </TouchableOpacity>
+
+                {/* AGENDA */}
+                <TouchableOpacity 
+                onPress={() => navigation.navigate('Agenda')}
+                    className="items-center">
+                    <Animated.View style={{
+                        backgroundColor: agendaStyles.backgroundColor,
+                        padding: 8,
+                        borderRadius: 12,
+                        transform: [{ scale: agendaStyles.scale }]
+                    }}>
+                    <Feather 
+                        name="calendar" 
+                        size={24} 
+                        color={isActive('Agenda') ? '#16a34a' : '#9ca3af'} 
+                    />
+                    </Animated.View>
+                    <Animated.Text style={{ fontSize: 10, color: agendaStyles.color }}>
+                        Agenda
+                    </Animated.Text>
+                </TouchableOpacity>
+
+                {/* PERFIL */}
+                <TouchableOpacity onPress={() => navigation.navigate('Perfil')} className="items-center">
+                    <Animated.View style={{
+                        backgroundColor: perfilStyles.backgroundColor,
+                        padding: 8,
+                        borderRadius: 12,
+                        transform: [{ scale: perfilStyles.scale }]
+                    }}>
+                        <Feather name="user" size={24} color={isActive('Perfil') ? '#16a34a' : '#9ca3af'} />
+                    </Animated.View>
+
+                    <Animated.Text style={{ fontSize: 10, color: perfilStyles.color }}>
+                        Perfil
+                    </Animated.Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </SafeAreaView>

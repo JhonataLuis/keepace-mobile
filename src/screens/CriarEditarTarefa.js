@@ -235,6 +235,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
 
             if (currentTaskId) { // Verifica se temos um ID (seja da lista ou da busca)
                 console.log("Recorrencia enviada: ", recorrencia);
+
                 // Atualizar (PUT)
                 await api.put(`/tasks/tarefas/${currentTaskId}`, taskData);
                     Toast.show({
@@ -365,6 +366,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
                                 numberOfLines={4}
                                 textAlignVertical='top'
                             />
+
                             <View className="mb-4">
                                 <Text className="text-gray-600 font-medium mb-2 ml-1 flex-row items-center">
                                     <Feather name='flag' size={16} /> Prioridade
@@ -380,7 +382,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
                                                     setPrioridade(prioridade === p.value ? '' : p.value) // Permite desmarcar
                                                 }
                                                 style={{
-                                                    paddingHorizontal: 14,
+                                                    paddingHorizontal: 10,
                                                     paddingVertical: 8,
                                                     borderRadius: 12,
                                                     borderWidth: isSelected ? 0 : 0.1,
