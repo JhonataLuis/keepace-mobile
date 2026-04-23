@@ -206,6 +206,96 @@ export default function CriarEditarTarefa({ navigation, route }) {
             };
         };
 
+         // Função para des-concluir tarefa
+        const desfazerConclusao = async (task) => {
+            console.log("Tentando desfazer a tarefa ID:", task.id); // Log debug
+            try {
+                // Chama o backend para des-concluir tarefa
+                // Endpoint aceite PATCH para restaurar a tarefa concluída
+                await api.patch(`/tasks/tarefas/${task.id}/restaurar`);
+
+                navigation.navigate('ListaTarefas', {
+                    restoredTask: {
+                        id: task.id,
+                        titulo,
+                        descricao,
+                        categoria,
+                        prioridade,
+                        status: 'TODO'
+                    }
+                });
+
+                setStatus('TODO'); // só atualiza o status na tela
+                Toast.hide(); // Esconde o tast após desfazer
+            } catch (error) {
+                console.log("Erro ao desfazer", error);
+            }
+        };
+
+
+        // Função para concluir tarefa pelo check
+        const atualizarStatusRapido = async (novoStatus) => {
+            if (!currentTaskId) return;
+
+            try {
+                setLoading(true);
+                 console.log("Editando tarefa : ");
+
+                 console.log("USER FRONT:", user?.id);
+                 console.log("TASK ID:", currentTaskId);
+
+                const isDone = novoStatus === 'DONE';
+
+                // Chama endpoint para conclusão da tarefa
+                await api.patch(`/tasks/tarefas/${currentTaskId}/concluir`, {
+                   
+                });
+               
+                // Atualiza UI imediatamente
+                setStatus(novoStatus);
+
+                Toast.show({
+                    type: 'undoAction',
+                    text1: isDone ? 'Tarefa concluída' : 'Tarefa reaberta',
+                    position: 'top',
+                    topOffset: 300,
+                    visibilityTime: 6000,
+                    props: {
+                        onUndo: () => desfazerConclusao({ id: currentTaskId })
+                    }
+                });
+
+                if (novoStatus === 'DONE') {
+                    setTimeout(() => navigation.goBack(), 500);
+                }
+
+            } catch(error) {
+                console.error("Erro ao concluir", error);
+                Toast.show({
+                    type: 'error',
+                    text1: 'Erro ao atualizar status'
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        // Função para marcar o checkbox para conclusão da tarefa baseado na cor da prioridade
+        const getCorPrioridade = () => {
+            const prioridadeObj = prioridades.find(
+                p => p.value === prioridade?.toUpperCase()
+            );
+            return prioridadeObj ? prioridadeObj.color : '#9ca3af'; // cinza padrão
+        };
+
+        // Função para concluir tarefa pelo checkbox
+        const toggleConcluir = () => {
+            if (!currentTaskId) return;
+
+            const novoStatus = status === 'DONE' ? 'TODO' : 'DONE';
+            atualizarStatusRapido(novoStatus);
+        }; // Permite marcar como concluído e desmarcar
+
     // Função para salvar a tarefa e atualizar tarefa
     const saveTask = async () => {
             setLoading(true);
@@ -272,6 +362,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
 
     };
 
+
     // Declaração para quando o titulo for maior que 0 / o usuário digitar 1 caracter no campo
     const isTituloValido = titulo.trim().length > 0;
 
@@ -290,9 +381,42 @@ export default function CriarEditarTarefa({ navigation, route }) {
                 >
                     <View className="flex-1 bg-white justify-center">
                         <View className="bg-white rounded-3xl p-6 shadow-xl">
-                            <Text className="text-2xl font-bold text-gray-800 mb-6 text-center">
-                                {currentTaskId ? 'Editar Tarefa' : 'Nova Tarefa'}
-                            </Text>
+                            <View className="flex-row items-center justify-center mb-6 relative">
+                                {/* CHECK (Só aparece na edição) */}
+                                {currentTaskId && (
+                                    <TouchableOpacity
+                                        onPress={toggleConcluir}
+                                        disabled={loading}
+                                        style={{
+                                            position: 'absolute',
+                                            left: 0,
+                                            width: 28,
+                                            height: 28,
+                                            borderRadius: 14, // deixa redondo
+                                            borderWidth: 2,
+                                            borderColor: status === 'DONE' ? getCorPrioridade() : getCorPrioridade(),
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            backgroundColor: status === 'DONE' ? getCorPrioridade() + '20' : 'transparent'
+                                            //padding: 10
+                                            
+                                        }}
+                                    >
+                                        {/* Ícone só aparece quando concluído */}
+                                        {status === 'DONE' && (
+                                            <Feather
+                                                name='check' 
+                                                size={18} 
+                                                color={getCorPrioridade()} 
+                                            />
+                                        )}
+                                    </TouchableOpacity>
+                                )}
+                                {/* TÍTULO */}
+                                <Text className="text-2xl font-bold text-gray-800 text-center">
+                                    {currentTaskId ? 'Editar Tarefa' : 'Nova Tarefa'}
+                                </Text>
+                            </View>
                             <Text className="text-gray-600 font-medium mb-2 ml-1">Titulo da Tarefa</Text>
                             <TextInput
                                 ref={inputRef}

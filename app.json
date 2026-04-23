@@ -26,7 +26,7 @@
       "googleServicesFile": "./google-services.json"
     },
     "web": {
-      "favicon": "./assets/icon-keepace.png"
+      "favicon": "./assets/keepace.png"
     },
     "plugins": [
       "@react-native-community/datetimepicker",

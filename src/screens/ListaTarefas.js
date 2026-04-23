@@ -136,7 +136,7 @@ export default function ListaTarefas({ navigation }) {
 
     // Ação para mudar as cores do card da tarefa conforme a prioridade
     const prioridadeCores = {
-      'BAIXA': { color: '#10B981', bg: '#D1FAE5', icon: 'arrow-down'}, // Branco/Cinza claro
+      'BAIXA': { color: '#10B981', bg: '#D1FAE5', icon: 'arrow-down'}, // Verde
       'MEDIA': {color: '#F59E0B', bg: '#FEF3C7', icon: 'minus' }, // Azul
       'ALTA': { color: '#F97316', bg: '#FFEDD5', icon: 'arrow-up'}, // Laranja
       'URGENTE': { color: '#EF4444', bg: '#FEE2E2', icon: 'alert-circle'}, // Vermelho
@@ -160,6 +160,7 @@ export default function ListaTarefas({ navigation }) {
 
         return categorias.find(cat => cat.value === normalizado) || null;
     };
+
 
     // Função para mostrar badge da tarefa recorrente
     const getRecorrenciaConfig = (recorrencia) => {
@@ -855,7 +856,7 @@ export default function ListaTarefas({ navigation }) {
                     </Animated.View>
 
                     <Animated.Text style={{ fontSize: 10, color: perfilStyles.color }}>
-                        Perfil
+                        Conta
                     </Animated.Text>
                     </TouchableOpacity>
                 </View>

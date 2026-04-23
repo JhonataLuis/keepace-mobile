@@ -27,7 +27,8 @@ const Stack = createStackNavigator();
 // Configuração de como a notificação aparece com o app aberto
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true, // 👈 substitui alert (mostra no topo tipo banner)
+    shouldShowList: true,   // 👈 mostra na central de notificações
     shouldPlaySound: true,
     shouldSetBadge: false,
   }),
