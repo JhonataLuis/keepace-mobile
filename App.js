@@ -20,6 +20,8 @@ import MyPerfil from './src/screens/MyPerfil';
 import Register from './src/screens/Register';
 import ForgotPassword from './src/screens/ForgotPassword';
 import ResetPassword from './src/screens/ResetPassword';
+import StreakScreen from './src/screens/StreakScreen';
+import AgendaCalendario from './src/screens/AgendaCalendario';
 
 
 const Stack = createStackNavigator();
@@ -321,9 +323,18 @@ function AppNavigator() {
              options={{ headerShown: false }}
             />
             <Stack.Screen 
+              name='Agenda'
+              component={AgendaCalendario}
+              options={{ title: 'Agenda' }}
+            />
+            <Stack.Screen 
              name="Perfil"
              component={MyPerfil}
              options={{ title: 'Meu Perfil' }}
+            />
+            <Stack.Screen
+              name='StreakScreen'
+              component={StreakScreen}
             />
           </>
         )}

@@ -57,11 +57,11 @@ export default function ListaTarefas({ navigation }) {
     const getAnimStyles = (anim) => ({
         backgroundColor: anim.interpolate({
             inputRange: [0, 1],
-            outputRange: ['transparent', '#DCFCE7'],
+            outputRange: ['transparent', '#E3F0DC'],
         }),
         color: anim.interpolate({
             inputRange: [0, 1],
-            outputRange: ['#9ca3af', '#16a34a'],
+            outputRange: ['#9ca3af', '#6E9155'],
         }),
         scale: anim.interpolate({
             inputRange: [0, 1],
@@ -136,18 +136,19 @@ export default function ListaTarefas({ navigation }) {
 
     // Ação para mudar as cores do card da tarefa conforme a prioridade
     const prioridadeCores = {
-      'BAIXA': { color: '#10B981', bg: '#D1FAE5', icon: 'arrow-down'}, // Verde
+      'BAIXA': { color: '#6B7280', bg: '#F3F4F6', icon: 'arrow-down'}, // Verde
       'MEDIA': {color: '#F59E0B', bg: '#FEF3C7', icon: 'minus' }, // Azul
-      'ALTA': { color: '#F97316', bg: '#FFEDD5', icon: 'arrow-up'}, // Laranja
-      'URGENTE': { color: '#EF4444', bg: '#FEE2E2', icon: 'alert-circle'}, // Vermelho
+      'ALTA': { color: '#D96A2E', bg: '#FFE2CC', icon: 'arrow-up'}, // Laranja
+      'URGENTE': { color: '#C44545', bg: '#FFD6D6', icon: 'alert-circle'}, // Vermelho
     };
 
     // Tags para categorias
     const categorias = [
-        {label: 'Pessoal', value: 'PESSOAL', color: '#3B82F6', bg: '#DBEAFE',},
-        {label: 'Trabalho', value: 'TRABALHO', color: '#10B981', bg: '#D1FAE5',},
+        {label: 'Pessoal', value: 'PESSOAL', color: '#3C6FA3', bg: '#DBEAFE',},
+        {label: 'Trabalho', value: 'TRABALHO', color: '#6E9155', bg: '#E3F0DC',},
         {label: 'Estudos', value: 'ESTUDOS', color: '#8B5CF6', bg: '#EDE9FE',},
     ];
+    
 
     // Função para mostrar cor da categoria
     const getCategoriaConfig = (categoriaValue) => {
@@ -236,7 +237,7 @@ export default function ListaTarefas({ navigation }) {
             setLoading(true);
             const currentPage = isFirstLoad ? 0 : page;
 
-            const response = await api.get(`/tasks/tarefas/paginadas?page=${currentPage}&size=25&concluido=false`);
+            const response = await api.get(`/tasks/tarefas/paginadas?page=${currentPage}&size=30&concluido=false`);
             console.log("CONTEÚDO DA API:", JSON.stringify(response.data.content, null, 2));
             
             const newTasks = response.data?.content || [];
@@ -766,10 +767,11 @@ export default function ListaTarefas({ navigation }) {
                 },
                 shadowOpacity: 0.30,
                 shadowRadius: 4.65,
+                backgroundColor: "#6E9155",
                 // Posicionamento dinâmico
                 bottom: 80 + insets.bottom // Sobe botão conforme a barra do android
               }} // Sombra no Android
-             className="absolute right-6 bg-green-600 w-14 h-14 rounded-2xl items-center justify-center shadow-lg z-50"
+             className="absolute right-6 w-14 h-14 rounded-2xl items-center justify-center shadow-lg z-50"
              onPress={() => navigation.navigate('CriarEditarTarefa')}
             >
                 <Feather name="plus" size={24} color="white"/>

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, RefreshCon
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../services/AuthContext';
 import { Feather } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import api from '../services/api';
 import { StatusBar } from 'expo-status-bar';
 
@@ -16,6 +17,16 @@ export default function Home({ navigation }) {
         completed: 0,
         pending: 0
     });
+    const [streak, setStreak] = useState(0);
+
+    const carregarStreak = async () => {
+        try {
+            const response = await api.get('/streaks/streak');
+            setStreak(response.data.streak);
+        } catch (error) {
+            console.log("Erro ao carregar streak", error?.response?.status, error?.response?.data);
+        }
+    };
 
     const loadStats = useCallback(async () => {
         try {
@@ -38,9 +49,13 @@ export default function Home({ navigation }) {
     }, [user]);
 
     useEffect(() => {
-        loadStats();
+        loadStats(); // carrega statisticas
+        carregarStreak(); // carrega streaks
         
-        return navigation.addListener('focus', loadStats);
+        return navigation.addListener('focus', () => {
+            loadStats();
+            carregarStreak();
+        });
     }, [navigation, loadStats]);
 
     const onRefresh = () => {
@@ -48,13 +63,17 @@ export default function Home({ navigation }) {
         loadStats();
     };
 
-    const ActionCard = ({ title, icon, color, onPress, description }) => (
+    // Componente action card
+    const ActionCard = ({ title, icon, color, onPress, description, style }) => (
         <TouchableOpacity
             onPress={onPress}
             activeOpacity={0.7}
+            //style={style}
             className="bg-white rounded-3xl p-5 mb-4 shadow-sm border border-gray-100 flex-1 mx-1"
         >
-            <View className={`w-12 h-12 rounded-2xl items-center justify-center mb-4 ${color}`}>
+            <View className={`w-12 h-12 rounded-2xl items-center justify-center mb-4 ${color || ''}`}
+            style={style}
+            >
                 <Feather name={icon} size={24} color="white" />
             </View>
             <Text className="text-gray-800 font-bold text-base">{title}</Text>
@@ -87,16 +106,61 @@ export default function Home({ navigation }) {
                     </View>
         
                 </View>
-                <TouchableOpacity onPress={() => navigation.navigate('Perfil')} className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center border-2 border-blue-50">
-                    <Text className="text-blue-600 font-bold text-2xl">{user?.name?.charAt(0) || 'U'}</Text>
+                <TouchableOpacity 
+                    onPress={() => navigation.navigate('Perfil')} 
+                    style={{ backgroundColor: '#E2DBF5', borderColor: '#D6E6F5'}}
+                    className="w-12 h-12 rounded-full items-center justify-center border-2">
+                    <Text style={{ color: '#5B4FA3'}} className="font-bold text-2xl">{user?.name?.charAt(0) || 'U'}</Text>
                 </TouchableOpacity>
             </View>
                 <ScrollView className="flex-1 px-4"
                     showsVerticalScrollIndicator={false}
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#5B4FA3" />}
                 >
+                   {/* STREAK DIAS PRODUTIVOS */}
+                    <View className="mt-6 mx-2">
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => navigation.navigate('StreakScreen')}
+                        >
+                            <View className="bg-white rounded-3xl p-5 flex-row mr-2 border border-gray-200/50 justify-center"
+                            //className="bg-gray-100/50 rounded-3xl p-5 flex-1 mr-2 border border-gray-200/50 items-center justify-center"
+                                style={{
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: 2 },
+                                    shadowOpacity: 0.05,
+                                    //shadowRadius: 4,
+                                    //elevation: 2,
+                                }}
+                            >
 
-                    {/* Dashboard de Estatísticas */}
+                                {/* LADO ESQUERDO (streak) */}
+                                <View className="flex-row items-center justify-between">
+                                    <View style={{ backgroundColor: "#FEE2CC" }} className="w-12 h-12 rounded-2xl items-center justify-center mr-4">
+                                        <MaterialCommunityIcons name='fire' size={36} color="#D96A2E" />
+                                    </View>
+
+                                    <View>
+                                        <Text style={{ color: "#D96A2E"}} className="font-bold text-lg">
+                                            {streak} dias produtivos
+                                        </Text>
+
+                                        <Text style={{ color: "#F7A866"}} className="text-xs">
+                                            {streak === 0 
+                                                ? 'Comece hoje 🚀'
+                                                : streak < 5 
+                                                ? 'Bom começo! Continue assim'
+                                                : streak < 10
+                                                ? 'Mandando bem! 🔥'
+                                                : 'Você está voando 🌟'}
+                                        </Text>
+                                    </View>
+                                </View>
+                                {/* LADO DIREITO (opcional) */}
+                                <Feather name="trending-up" size={24} color="#D96A2E" />
+                            </View>
+                        </TouchableOpacity>
+                    </View>
                     {/* Dashboard de Estatísticas */}
                     <View className="mt-6 flex-row justify-between items-end">
                         {/* Card TOTAL */}
@@ -114,7 +178,7 @@ export default function Home({ navigation }) {
                             activeOpacity={0.7}
                             className="bg-white rounded-3xl p-5 flex-[1.2] mx-1 border border-gray-100 items-center shadow-sm"
                         >
-                            <Feather name='check-circle' size={20} color={stats.completed > 0 ? "#10b981" : "#9ca3af"} />
+                            <Feather name='check-circle' size={20} color={stats.completed > 0 ? "#6E9155" : "#9ca3af"} />
                             <Text className={`text-2xl font-black mt-1 ${stats.completed > 0 ? 'text-gray-800' : 'text-gray-300'}`}>
                                 {stats.completed || 0}
                             </Text>
@@ -127,7 +191,7 @@ export default function Home({ navigation }) {
                             activeOpacity={0.7}
                             className="bg-white rounded-3xl p-5 flex-[1.2] ml-2 border border-gray-100 items-center shadow-sm"
                         >
-                            <Feather name="clock" size={20} color={stats.pending > 0 ? "#f59e0b" : "#9ca3af"} />
+                            <Feather name="clock" size={20} color={stats.pending > 0 ? "#D96A2E" : "#9ca3af"} />
                             <Text className={`text-2xl font-black mt-1 ${stats.pending > 0 ? 'text-gray-800' : 'text-gray-300'}`}>
                                 {stats.pending || 0}
                             </Text>
@@ -166,14 +230,14 @@ export default function Home({ navigation }) {
                             title="Tarefas"
                             description="Ver sua lista"
                             icon="layers"
-                            color="bg-blue-500"
+                            style={{ backgroundColor: "#3C6FA3"}}
                             onPress={() => navigation.navigate('ListaTarefas')}
                         />
                         <ActionCard 
                             title="Nova"
                             description="Criar Tarefa"
                             icon="plus"  
-                            color="bg-green-500"
+                            style={{ backgroundColor: "#6E9155"}}
                             onPress={() => navigation.navigate('CriarEditarTarefa')}  
                         />
                     </View>
@@ -183,7 +247,8 @@ export default function Home({ navigation }) {
                             title="Perfil"
                             description="Suas configs"
                             icon="settings"
-                            color="bg-purple-500"
+                            //color="bg-purple-500"
+                            style={{ backgroundColor: "#5B4FA3"}}
                             onPress={() => navigation.navigate('Perfil')}
                         />
                         <TouchableOpacity
@@ -191,8 +256,8 @@ export default function Home({ navigation }) {
                             activeOpacity={0.7}
                             className="bg-red-50 rounded-3xl p-5 mb-4 flex-1 mx-1 items-center justify-center border border-red-100"
                         >
-                            <Feather name="log-out" size={24} color="#ef4444" />
-                            <Text className="text-red-500 font-bold mt-2">Sair</Text>
+                            <Feather name="log-out" size={24} color="#C44545" />
+                            <Text style={{ color: "#C44545" }} className="font-bold mt-2">Sair</Text>
                         </TouchableOpacity>
                     </View>
 

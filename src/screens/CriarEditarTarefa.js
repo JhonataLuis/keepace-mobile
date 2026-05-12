@@ -138,26 +138,26 @@ export default function CriarEditarTarefa({ navigation, route }) {
 
      // Tags para categorias
         const categorias = [
-            {label: 'Pessoal', value: 'PESSOAL', color: '#3B82F6', bg: '#DBEAFE',},
-            {label: 'Trabalho', value: 'TRABALHO', color: '#10B981', bg: '#EDE9FE',},
-            {label: 'Estudos', value: 'ESTUDOS', color: '#8B5CF6', bg: '#EDE9FE',},
+            { label: 'Pessoal', value: 'PESSOAL', color: '#3C6FA3', bg: '#DBEAFE',},
+            { label: 'Trabalho', value: 'TRABALHO', color: '#6E9155', bg: '#E3F0DC',},
+            { label: 'Estudos', value: 'ESTUDOS', color: '#5B4FA3', bg: '#E2DBF5',},
         ];
 
         
         // Tags para prioridades
         const prioridades = [
-            {label: 'Baixa', value: 'BAIXA', color: '#10B981', bg: '#D1FAE5', icon: 'arrow-down',}, // Cor verde
-            {label: 'Média', value: 'MEDIA', color: '#F59E0B', bg: '#FEF3C7', icon: 'minus',},// Cor amarelo
-            {label: 'Alta', value: 'ALTA', color: '#F97316', bg: '#FFEDD5', icon: 'arrow-up',},// Cor laranja
-            {label: 'Urgente', value: 'URGENTE', color: '#EF4444', bg: '#FEE2E2', icon: 'alert-circle',},
+            { label: 'Baixa', value: 'BAIXA', color: '#6B7280', bg: '#F3F4F6', icon: 'arrow-down',}, // Cor verde
+            { label: 'Média', value: 'MEDIA', color: '#C9A63A', bg: '#FEF3C7', icon: 'minus',},// Cor amarelo
+            { label: 'Alta', value: 'ALTA', color: '#D96A2E', bg: '#FFE2CC', icon: 'arrow-up',},// Cor laranja
+            { label: 'Urgente', value: 'URGENTE', color: '#C44545', bg: '#FFD6D6', icon: 'alert-circle',},
         ];
 
-        // Para recorrência de tarefas
+        //Tags Para recorrência de tarefas
         const opcoesRecorrencia = [
             { label: 'Não repetir', value: 'NENHUMA', icon: 'slash', color: '#6b7280', bg: '#E5E7EB' },
-            { label: 'Todo dia', value: 'DIARIA', icon: 'sun', color: '#3b82f6', bg: '#DBEAFE' }, // azul
-            { label: 'Toda semana', value: 'SEMANAL', icon: 'calendar',  color: '#8b5cf6', bg: '#EDE9FE' }, // roxo
-            { label: 'Todo mês', value: 'MENSAL', icon: 'refresh-cw', color: '#f97316', bg: '#FFEDD5' }, // laranja
+            { label: 'Todo dia', value: 'DIARIA', icon: 'sun', color: '#3C6FA3', bg: '#DBEAFE' }, // azul
+            { label: 'Toda semana', value: 'SEMANAL', icon: 'calendar',  color: '#5B4FA3', bg: '#E2DBF5' }, // roxo
+            { label: 'Todo mês', value: 'MENSAL', icon: 'refresh-cw', color: '#D96A2E', bg: '#FFE2CC' }, // laranja
         ];
 
         // Função RECORRÊNCIA DE TAREFAS
@@ -194,7 +194,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
             if (isTomorrow(date)) {
                 return {
                     label: `Amanhã ${format(date, "HH:mm")}`,
-                    color: '#2563eb',
+                    color: '#3C6FA3',
                     icon: 'calendar'
                 };
             }

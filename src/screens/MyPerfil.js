@@ -124,7 +124,7 @@ export default function Perfil({ navigation }) {
           className={`flex-row items-center py-4 ${!isLast ? 'border-b border-gray-100' : ''} ${isComingSoon ? 'opacity-60' : ''}`}
         >
             <View className={`p-2 rounded-lg ${isComingSoon ? 'bg-gray-100' : 'bg-blue-100'}`}>
-                <Feather name={icon} size={20} color={isComingSoon ? "#9ca3af" : "#3b82f6"}/>
+                <Feather name={icon} size={20} color={isComingSoon ? "#9ca3af" : "#3C6FA3"}/>
             </View>
             <View className="flex-1 ml-4">
                 <View className="flex-row items-center">
@@ -245,10 +245,11 @@ export default function Perfil({ navigation }) {
                     <View className="px-6 mb-12">
                         <TouchableOpacity
                             onPress={logout}
-                            className="bg-red-50 flex-row items-center justify-center p-4 rounded-2xl border border-red-100"
+                            style={{ backgroundColor: "#FFD6D6"}}
+                            className="flex-row items-center justify-center p-4 rounded-2xl border border-red-100"
                         >
-                            <Feather name='log-out' size={20} color="#ef4444" />
-                            <Text className="ml-2 text-red-500 font-bold text-lg">Encerrar sessão</Text>
+                            <Feather name='log-out' size={20} color="#C44545" />
+                            <Text style={{ color: "#C44545" }} className="ml-2 font-bold text-lg">Encerrar sessão</Text>
                         </TouchableOpacity>
                             <Text className="text-center text-gray-300 text-[10px] mt-6 tracking-tighter">
                                 KeePace v1.0.0

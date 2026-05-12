@@ -3,6 +3,7 @@
     "name": "keepeace-mobile",
     "slug": "keepeace-mobile",
     "version": "1.0.0",
+    "scheme": "keepeacemobile",
     "orientation": "portrait",
     "icon": "./assets/icon-keepace.png",
     "userInterfaceStyle": "light",
@@ -14,9 +15,10 @@
     },
     "ios": {
       "supportsTablet": true,
-       "bundleIdentifier": "com.openfonte.keepeacemobile"
+      "bundleIdentifier": "com.openfonte.keepeacemobile"
     },
     "android": {
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon-keepace.png",
         "backgroundColor": "#ffffff"
@@ -29,26 +31,13 @@
       "favicon": "./assets/keepace.png"
     },
     "plugins": [
-      "@react-native-community/datetimepicker",
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/icon-keepace.png",
-          "color": "#ffffff",
-          "sounds": ["./assets/sounds/notification.wav"]
-        }
-      ]
+      "@react-native-community/datetimepicker"
     ],
     "extra": {
       "eas": {
         "projectId": "993e6439-0ea3-4413-9a8d-4520cd8c4f02"
       }
     },
-     "notification": {
-      "icon": "./assets/icon-keepace.png",
-      "color": "#ffffff",
-      "androidMode": "default",
-      "androidCollapsedTitle": "KeeePace"
-    }
+    "owner": "openfonte"
   }
 }
