@@ -91,10 +91,10 @@ export default function Home({ navigation }) {
             {/* Header Moderno */}
             <View className="px-6 py-6 flex-row justify-between items-center bg-white border-b border-gray-100">
                 <View className="flex-1">
-                     {/* DATA (embaixo) */}
+                     {/* DATA (embaixo) 
                     <Text className="text-gray-400 text-sm mt-1 capitalize">
                         {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit' })}
-                    </Text>
+                    </Text>*/}
                     {/* LINHA: Olá + Nome */}
                     <View className="flex-row items-center">
                         <Text className="text-gray-500 text-sm font-medium mr-1">
@@ -104,7 +104,6 @@ export default function Home({ navigation }) {
                             {user?.name?.split(' ')[0] || 'Usuário'}! 👋
                         </Text>
                     </View>
-        
                 </View>
                 <TouchableOpacity 
                     onPress={() => navigation.navigate('Perfil')} 

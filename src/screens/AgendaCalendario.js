@@ -117,20 +117,28 @@ export default function AgendaCalendario({ navigation }) {
 
     return (
         <View className="flex-1 bg-gray-50" >
-            <SafeAreaView edges={['top']} style={{ backgroundColor: "#5b4fa3"}}>
-                <StatusBar style="light" backgroundColor="#ffffff" />
-                <View className="px-4 py-4 flex-row items-center justify-between">
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Feather name="arrow-left" size={24} color="white" />
-                    </TouchableOpacity>
-                    <Text className="text-white text-lg font-bold">Calendário de Tarefas</Text>
+            <SafeAreaView edges={['top']} className="bg-white">
+                <StatusBar edges={['top']} className="bg-white" />
+                <View className="px-4 py-4 flex-row items-center justify-between shadow-sm border-b border-gray-100">
                     <TouchableOpacity 
-                        style={{
-                            
-                        }}
+                        onPress={() => navigation.goBack()}
+                        className="p-2 -ml-2 active:opacity-60"
+                        hitSlop={{ top: 10, bottom: 10, left:10, right: 10 }}
+                        >
+                        <Feather name="arrow-left" size={24} color="#6B7280" />
+                    </TouchableOpacity>
+                    <View className="flex-row items-center space-x-2">
+                         <Feather name="calendar" size={20} color="#6E9155" />
+                        <Text className="text-gray-800 text-lg font-bold">
+                            Calendário
+                        </Text>
+                    </View>
+                    <TouchableOpacity 
                         onPress={() => navigation.navigate('CriarEditarTarefa')}
+                        className="bg-[#6E9155] p-2 rounded-xl active:opacity-80"
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
-                        <Feather name="plus" size={24} color="white" />
+                        <Feather name='plus' size={20} color="white" />
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
