@@ -22,6 +22,8 @@ assets/
 # Google services
 google-services.json
 app.json
+package.json
+package-lock.json
 
 # Metro
 .metro-health-check*

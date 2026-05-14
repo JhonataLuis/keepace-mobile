@@ -147,7 +147,7 @@ export default function CriarEditarTarefa({ navigation, route }) {
         // Tags para prioridades
         const prioridades = [
             { label: 'Baixa', value: 'BAIXA', color: '#6B7280', bg: '#F3F4F6', icon: 'arrow-down',}, // Cor verde
-            { label: 'Média', value: 'MEDIA', color: '#C9A63A', bg: '#FEF3C7', icon: 'minus',},// Cor amarelo
+            { label: 'Média', value: 'MEDIA', color: '#F59E0B', bg: '#FEF3C7', icon: 'minus',},// Cor amarelo
             { label: 'Alta', value: 'ALTA', color: '#D96A2E', bg: '#FFE2CC', icon: 'arrow-up',},// Cor laranja
             { label: 'Urgente', value: 'URGENTE', color: '#C44545', bg: '#FFD6D6', icon: 'alert-circle',},
         ];

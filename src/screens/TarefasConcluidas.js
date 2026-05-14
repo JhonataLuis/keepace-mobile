@@ -25,7 +25,7 @@ export default function TarefasConcluidas({ navigation }) {
         try {
             console.log('Tentando carregar tarefas concluídas...')
             // Rota do backend para listar tarefas concluídas
-            const response = await api.get('/tasks/tarefas/paginadas?page=0&size=50&concluido=true');
+            const response = await api.get('/tasks/tarefas/paginadas?page=0&size=100&concluido=true');
             
             setCompletedTasks(response.data.content || []);
             console.log('Tarefas', response.data.content);
@@ -231,7 +231,7 @@ export default function TarefasConcluidas({ navigation }) {
                     animationType="fade"
                 >
                     <View className="flex-1 justify-end bg-black/40">
-                        <View className="bg-white rounded-t-[40px] p-8 items-center"
+                        <View className="bg-white rounded-t-3xl p-8 items-center"
                             style={{ paddingBottom: insets.bottom > 0 ? insets.bottom : 20 }}>
                             <View className="w-12 h-1.5 bg-gray-200 rounded-full mb-6"/>
                             <View className="bg-red-100 p-4 rounded-full mb-4">

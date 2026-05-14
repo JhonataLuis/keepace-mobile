@@ -245,11 +245,12 @@ export default function Perfil({ navigation }) {
                     <View className="px-6 mb-12">
                         <TouchableOpacity
                             onPress={logout}
-                            style={{ backgroundColor: "#FFD6D6"}}
-                            className="flex-row items-center justify-center p-4 rounded-2xl border border-red-100"
+                            className="flex-row items-center justify-center py-3 rounded-xl bg-gray-50 border border-gray-100"
                         >
-                            <Feather name='log-out' size={20} color="#C44545" />
-                            <Text style={{ color: "#C44545" }} className="ml-2 font-bold text-lg">Encerrar sessão</Text>
+                            <Feather name='log-out' size={16} color="#C44545" />
+                            <Text style={{ color: "#C44545" }} className="ml-2 text-sm font-medium">
+                                Encerrar sessão
+                            </Text>
                         </TouchableOpacity>
                             <Text className="text-center text-gray-300 text-[10px] mt-6 tracking-tighter">
                                 KeePace v1.0.0
@@ -273,7 +274,7 @@ export default function Perfil({ navigation }) {
                         onPress={() => !loading && setIsPasswordModalVisible(false)}
                     />
 
-                    <View className="bg-white rounded-t-[40px] p-8 shadow-2xl" 
+                    <View className="bg-white rounded-t-3xl p-8 shadow-2xl" 
                         style={{ minHeight: '65%',
                             paddingBottom: insets.bottom > 0 ? insets.bottom : 20
                          }}>
@@ -352,7 +353,7 @@ export default function Perfil({ navigation }) {
                                         <ActivityIndicator color="#fff" />
                                     ) : (
                                          <Text className="text-white text-center font-bold text-lg">
-                                            Atualizar Senha
+                                            Atualizar
                                           </Text>
                                     )}
                                 </TouchableOpacity>

@@ -464,7 +464,7 @@ export default function ListaTarefas({ navigation }) {
                         </View>
                         {item.descricao && (
                             <Text 
-                                numberOfLines={1} // Limita a 3 linhas
+                                numberOfLines={1} // Limita a 1 linha
                                 ellipsizeMode='tail' // Adiciona o "..." no final
                                 className={`text-sm mt-1 ml-8 ${item.concluido ? 'text-gray-500' : 'text-gray-600'}`}>
                                 {item.descricao}

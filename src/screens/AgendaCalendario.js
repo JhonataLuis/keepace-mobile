@@ -117,8 +117,8 @@ export default function AgendaCalendario({ navigation }) {
 
     return (
         <View className="flex-1 bg-gray-50" >
-            <SafeAreaView edges={['top']} className="bg-white" >
-                <StatusBar style="dark" backgroundColor="#ffffff" />
+            <SafeAreaView edges={['top']} style={{ backgroundColor: "#5b4fa3"}}>
+                <StatusBar style="light" backgroundColor="#ffffff" />
                 <View className="px-4 py-4 flex-row items-center justify-between">
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Feather name="arrow-left" size={24} color="white" />
@@ -137,6 +137,9 @@ export default function AgendaCalendario({ navigation }) {
 
             <ScrollView 
                 className="flex-1"
+                contentContainerStyle={{
+                    paddingBottom: 100 + insets.bottom
+                }}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#5B4FA3" />
                 }
@@ -178,7 +181,7 @@ export default function AgendaCalendario({ navigation }) {
                 />
 
                 {/* Tarefas do dia selecionado */}
-                <View className="m-4 rounded-2xl p-4" style={{ minHeight: 200 }}>
+                <View className="px-2 pt-4 pb-2" style={{ minHeight: 200 }}>
                     <Text className="text-lg font-bold mb-4" style={{ color: '#5B4FA3' }}>
                         {selectedDate ? (
                             `📅 ${selectedDate.split('-').reverse().join('/')}`
@@ -193,38 +196,58 @@ export default function AgendaCalendario({ navigation }) {
                                 <TouchableOpacity
                                     key={task.id}
                                     onPress={() => navigation.navigate('CriarEditarTarefa', { taskId: task.id })}
-                                    className="bg-white rounded-2xl p-4 mb-3"
+                                    className="bg-white rounded-2xl p-4 mb-2 w-full"
                                     style={{
                                         borderLeftWidth: 4,
                                         elevation: 2,
                                         shadowOpacity: 0.05,
                                         shadowRadius: 3,
-                                        borderLeftColor: task.completed ? '#6E9155' : '#5B4FA3'
+                                        opacity: task.completed ? 0.55 : 1,
+                                        borderLeftColor: task.concluido ? '#9CA3AF' : '#5B4FA3'
                                     }}
                                 >
                                     <View className="flex-row items-center justify-between">
                                         <View className="flex-1">
-                                            <Text className="font-bold text-gray-800">{task.titulo}</Text>
+                                            <Text className={`font-bold ${
+                                                task.concluido
+                                                    ? 'text-gray-400 line-through'
+                                                    : 'text-gray-800'
+                                            }`}
+
+                                            >
+                                                {task.titulo}
+                                            </Text>
                                             {task.descricao && (
-                                                <Text className="text-gray-400 text-xs mt-1" numberOfLines={2}>
+                                                <Text 
+                                                    numberOfLines={1} // Limita a 1 linha
+                                                    ellipsizeMode='tail' // Adiciona '...' no final
+                                                    className={`text-xs mt-1 ${
+                                                        task.completed
+                                                            ? 'text-gray-300 line-through'
+                                                            : 'text-gray-400'
+                                                    }`} 
+                                               >
                                                     {task.descricao}
                                                 </Text>
                                             )}
                                             <View className="flex-row items-center mt-2">
                                                 <Feather 
-                                                    name={task.completed ? "check-circle" : "clock"} 
+                                                    name={task.concluido ? "check-circle" : "clock"} 
                                                     size={12} 
-                                                    color={task.completed ? "#6E9155" : "#5B4FA3"} 
+                                                    color={task.concluido ? "#6E9155" : "#5B4FA3"} 
                                                 />
                                                 <Text className="text-xs text-gray-400 ml-1">
-                                                    {task.completed ? "Concluída" : "Pendente"}
+                                                    {task.concluido ? "Concluída" : "Pendente"}
                                                 </Text>
                                                 <Text className="text-xs text-gray-800 ml-1">
                                                     {task.title}
                                                 </Text>
                                             </View>
                                         </View>
-                                        <Feather name="chevron-right" size={20} color="#9ca3af" />
+                                        <Feather 
+                                        name="chevron-right" 
+                                        size={20} 
+                                        color={task.concluido ? "#D1D5DB" : "#9CA3AF"} />
                                     </View>
                                 </TouchableOpacity>
                             ))

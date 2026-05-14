@@ -251,22 +251,20 @@ export default function Home({ navigation }) {
                             style={{ backgroundColor: "#5B4FA3"}}
                             onPress={() => navigation.navigate('Perfil')}
                         />
-                        <TouchableOpacity
-                            onPress={logout}
-                            activeOpacity={0.7}
-                            className="bg-red-50 rounded-3xl p-5 mb-4 flex-1 mx-1 items-center justify-center border border-red-100"
-                        >
-                            <Feather name="log-out" size={24} color="#C44545" />
-                            <Text style={{ color: "#C44545" }} className="font-bold mt-2">Sair</Text>
-                        </TouchableOpacity>
+                        <ActionCard 
+                            title="Agenda"
+                            description="Tarefas dias"
+                            icon="calendar"
+                            //color="bg-purple-500"
+                            style={{ backgroundColor: "#D96A2E"}}
+                            onPress={() => navigation.navigate('Agenda')}
+                        />
                     </View>
 
-                    {loading && <ActivityIndicator color="#3b82f6" className="mt-4" />}
+                    {loading && <ActivityIndicator color="#3C6FA3" className="mt-4" />}
                     
                     <View className="h-20" />
-               
              </ScrollView>
-      
         </View>
     );
 }
