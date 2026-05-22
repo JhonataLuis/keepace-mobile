@@ -609,8 +609,8 @@ export default function ListaTarefas({ navigation }) {
         <SafeAreaView className="flex-1 bg-white" edges={['top']}>
         <View className="flex-1 bg-gray-100">
             {/* Header fixo */}
-            <View className="bg-white pt-12 pb-4 px-6 flex-row justify-between items-center shadow-sm z-50">
-                    <Text className="text-xl font-bold text-gray-800">Minhas Tarefas</Text>
+            <View className="bg-white p-5 flex-row justify-between items-center shadow-sm z-50">
+                    <Text className="text-xl font-bold text-gray-800">Tarefas</Text>
                 <View className="flex-row">
 
                     {/* Container do Menu */}
@@ -698,7 +698,7 @@ export default function ListaTarefas({ navigation }) {
                     // View centralizada para estado vazio
                     <View className="items-center justify-center mt-20 px-10">
                         <View className="bg-blue-50 p-8 rounded-full mb-6">
-                            <Feather name='clipboard' size={70} color="#3b82f6" />
+                            <Feather name='clipboard' size={70} color="#3C6FA3" />
                         </View>
                         <Text className="text-xl font-bold text-gray-800 text-center">
                             Sua lista está vazia

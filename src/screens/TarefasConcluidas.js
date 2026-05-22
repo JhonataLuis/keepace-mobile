@@ -125,31 +125,31 @@ export default function TarefasConcluidas({ navigation }) {
             style={({ pressed }) => [
                 { transform: [{ scale: pressed ? 0.98 : 1 }] }
             ]}
-            className="bg-white mx-3 mb-4 rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+            className="bg-white mx-3 mb-3 rounded-xl shadow-sm border border-gray-50 overflow-hidden"
         >
                 <View 
-                    style={{ backgroundColor: getCorPrioridade(item.prioridade) === 'bg-red-500' ? '#ef4444' : 
-                                       getCorPrioridade(item.prioridade) === 'bg-yellow-500' ? '#eab308' : 
-                                       getCorPrioridade(item.prioridade) === 'bg-blue-500' ? '#3b82f6' : '#d1d5db' }}
-            className="absolute left-0 top-0 bottom-0 w-2"
+                    style={{ backgroundColor: getCorPrioridade(item.prioridade) === 'bg-red-500' ? '#C44545' : 
+                                       getCorPrioridade(item.prioridade) === 'bg-yellow-500' ? '#F59E0B' : 
+                                       getCorPrioridade(item.prioridade) === 'bg-blue-500' ? '#3C6FA3' : '#d1d5db' }}
+                    className="absolute left-0 top-0 bottom-0 w-1.5"
                     />
-                    <View className="p-5 flex-row items-center justify-between">
+                    <View className="p-3 flex-row items-center justify-between">
                         <View className="flex-row items-center flex-1">
                         {/* Check ícone decorativo */}
-                        <View className="bg-green-100 p-3 rounded-full">
-                            <Feather name='check' size={18} color="#16a34a" />
+                        <View className="p-2 rounded-full" style={{ backgroundColor: "#E3F0DC"}}>
+                            <Feather name='check' size={16} color="#6E9155" />
                         </View>
                     
                         {/* Conteúdo central */}
-                        <View className="ml-4 flex-1 pr-2">
+                        <View className="ml-3 flex-1 pr-2">
                             <Text
                                 numberOfLines={1}
-                                className="text-gray-400 font-medium text-lg line-through leading-tight">
+                                className="text-gray-400 font-medium text-base line-through leading-tight">
                                 {item.titulo}
                             </Text>
-                            <View className="flex-row items-center mt-2">
-                                <Feather name='calendar' size={12} color="#9ca3af" />
-                                <Text className="text-xs text-gray-400 ml-1.5 font-medium" >
+                            <View className="flex-row items-center mt-1">
+                                <Feather name='calendar' size={11} color="#9ca3af" />
+                                <Text className="text-xs text-gray-400 ml-1 font-medium" >
                                     {formatarData(item.updatedAt)}
                                 </Text>
                             </View>
@@ -161,17 +161,19 @@ export default function TarefasConcluidas({ navigation }) {
                         {/* Botão Restaurar */}
                         <TouchableOpacity 
                             onPress={() => handleRestaurar(item)}
-                            className="p-3 bg-blue-50 rounded-2xl mr-2 active:bg-blue-100"
+                            className="p-2 rounded-xl mr-1 active:opacity-80"
+                            style={{ backgroundColor: "#D6E6F5"}}
                         >
-                            <Feather name='rotate-ccw' size={20} color="#3b82f6" />
+                            <Feather name='rotate-ccw' size={14} color="#3C6FA3" />
                         </TouchableOpacity>
 
                         {/* Botão Excluir */}
                         <TouchableOpacity
                             onPress={() => openDeleteDialog(item)}
-                            className="p-3 bg-red-50 rounded-2xl active:bg-red-100"
+                            className="p-2 rounded-xl active:opacity-80"
+                            style={{ backgroundColor: "#FFD6D6"}}
                         >
-                            <Feather name='trash-2' size={20} color="#ef4444" />
+                            <Feather name='trash-2' size={14} color="#C44545" />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -192,7 +194,7 @@ export default function TarefasConcluidas({ navigation }) {
                 <View className="ml-3">
                     <Text className="text-xl font-bold text-gray-800">Registro de Atividades</Text>
                     {completedTasks.length > 0 && (
-                        <Text className="text-xs text-gray-500">
+                        <Text className="text-xs font-bold" style={{ color: "#C44545"}}>
                             {completedTasks.length} {completedTasks.length === 1 ? 'tarefa finalizada' : 'tarefas finalizadas'}
                         </Text>
                     )}

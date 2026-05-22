@@ -89,7 +89,7 @@ export default function Home({ navigation }) {
                 <StatusBar style="dark" backgroundColor="#ffffff" />
             </SafeAreaView>
             {/* Header Moderno */}
-            <View className="px-6 py-6 flex-row justify-between items-center bg-white border-b border-gray-100">
+            <View className="px-6 py-5 flex-row justify-between items-center bg-white border-b border-gray-100">
                 <View className="flex-1">
                      {/* DATA (embaixo) 
                     <Text className="text-gray-400 text-sm mt-1 capitalize">
@@ -107,9 +107,11 @@ export default function Home({ navigation }) {
                 </View>
                 <TouchableOpacity 
                     onPress={() => navigation.navigate('Perfil')} 
-                    style={{ backgroundColor: '#E2DBF5', borderColor: '#D6E6F5'}}
+                    style={{ backgroundColor: '#E2DBF5', borderColor: '#A89BE0'}}
                     className="w-12 h-12 rounded-full items-center justify-center border-2">
-                    <Text style={{ color: '#5B4FA3'}} className="font-bold text-2xl">{user?.name?.charAt(0) || 'U'}</Text>
+                    <Text style={{ color: '#5B4FA3'}} className="font-bold text-2xl">
+                        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </Text>
                 </TouchableOpacity>
             </View>
                 <ScrollView className="flex-1 px-4"
