@@ -18,7 +18,7 @@ export default function Perfil({ navigation }) {
     const [showPassword, setShowPassword] = useState(false); // Olhinho para mostrar e ocultar senha
     const [loading, setLoading] = useState(false);
 
-    const BASE_URL = "http://192.168.5.115:8080";
+    const BASE_URL = "http://192.168.5.114:8080";
 
     // Regex para validar senha no padrão de cadastro
     const validatePassword = (password) => {
