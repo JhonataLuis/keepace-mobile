@@ -8,7 +8,7 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
-assets/
+#assets/
 
 # Native
 .kotlin/
@@ -21,9 +21,9 @@ assets/
 
 # Google services
 google-services.json
-app.json
-package.json
-package-lock.json
+#app.json
+#package.json
+#package-lock.json
 
 # Metro
 .metro-health-check*
