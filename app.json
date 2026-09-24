@@ -5,11 +5,11 @@
     "version": "1.0.0",
     "scheme": "keepeacemobile",
     "orientation": "portrait",
-    "icon": "./assets/icon-keepace.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "splash": {
-      "image": "./assets/icon-keepace.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,27 +17,40 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.openfonte.keepeacemobile"
     },
-    "android": {
-      "usesCleartextTraffic": true,
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/keepace.png",
-        "backgroundColor": "#1A2B4A"
-      },
-      "edgeToEdgeEnabled": true,
-      "package": "com.openfonte.keepeacemobile",
-      "googleServicesFile": "./google-services.json"
+   "android": {
+    "usesCleartextTraffic": true,
+    "adaptiveIcon": {
+      "foregroundImage": "./assets/icon.png",
+      "backgroundColor": "#ffffff"
     },
+    "edgeToEdgeEnabled": true,
+    "package": "com.openfonte.keepeacemobile"
+  },
     "web": {
-      "favicon": "./assets/keepace.png"
+      "favicon": "./assets/icon.png"
     },
     "plugins": [
       "@react-native-community/datetimepicker",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#ffffff"
+        }
+      ],
+      "./plugins/withCleartextTraffic"
     ],
     "extra": {
       "eas": {
         "projectId": "993e6439-0ea3-4413-9a8d-4520cd8c4f02"
       }
+    },
+    "notification": {
+      "icon": "./assets/icon.png",
+      "color": "#ffffff",
+      "androidMode": "default",
+      "androidCollapsedTitle": "KeeePace"
     },
     "owner": "openfonte"
   }

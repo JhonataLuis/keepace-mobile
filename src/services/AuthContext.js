@@ -15,6 +15,20 @@ export const AuthProvider = ({ children }) => {
     // lógica de login com o seu backend Java
   const login = async (email, password) => {
     try {
+
+        console.log('=== TESTE FETCH ===');
+
+        try {
+            const testeFetch = await fetch('http://192.168.5.114:8080/actuator/health');
+
+            console.log('FETCH STATUS:', testeFetch.status);
+
+            const textoFetch = await testeFetch.text();
+
+            console.log('FETCH RESPONSE:', textoFetch);
+        } catch (fetchError) {
+            console.error('FETCH ERROR:', fetchError);
+        }
         const response = await api.post('/auth/login', { email, password });
 
         if(response.data && response.data.token) {
