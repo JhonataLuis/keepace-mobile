@@ -474,10 +474,16 @@ export default function CriarEditarTarefa({ navigation, route }) {
                                 <Picker
                                     selectedValue={status}
                                     onValueChange={(itemValue) => setStatus(itemValue)}    
+                                    style={{
+                                        heitht: 50,
+                                        color: '#1f9fafb', // texto escuro sem depender do wrapper
+                                        backgroundColor: '#f9fafb',
+                                    }}
+                                    dropdownIconColor='#6b7280' // cor da setinha no Android
                                 >
-                                    <Picker.Item label='A Fazer' value="TODO" />
-                                    <Picker.Item label='Em Andamento' value="DOING" />
-                                    <Picker.Item label='Concluído' value="DONE" />
+                                    <Picker.Item label='A Fazer' value="TODO" color="#1f2937" />
+                                    <Picker.Item label='Em Andamento' value="DOING" color="#1f2937" />
+                                    <Picker.Item label='Concluído' value="DONE" color="#1f2937" />
                                 </Picker>
                             </View>
                             <Text className="text-gray-600 font-medium mb-2 ml-1">Descrição</Text>

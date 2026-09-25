@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
         console.log('=== TESTE FETCH ===');
 
         try {
-            const testeFetch = await fetch('http://192.168.5.114:8080/actuator/health');
+            const testeFetch = await fetch('http://192.168.5.119:8080/actuator/health');
 
             console.log('FETCH STATUS:', testeFetch.status);
 
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
             await AsyncStorage.setItem('@KeePace:token', token);
 
             // configura o token em todas as próximas requisições
-            api.defaults.headers.Authorization = `Bearer ${token}`;
+            //api.defaults.headers.Authorization = `Bearer ${token}`;
 
             setUser(userData);
             setIsAuthenticate(true);
