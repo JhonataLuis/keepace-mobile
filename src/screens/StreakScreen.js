@@ -9,7 +9,8 @@ import { useAuth } from '../services/AuthContext';
 import api from '../services/api';
 
 const { width: screenWidth } = Dimensions.get('window');
-
+// Meta diária fixa
+const META_DIARIA = 5;
 
 export default function StreakScreen({ navigation }) {
 
@@ -115,12 +116,15 @@ export default function StreakScreen({ navigation }) {
     const updateTrendData = (data, period) => {
         const today = new Date();
         const daysToShow = period === 'day' ? 1 : period === 'week' ? 7 : 30;
+
+        // Meta diária fixa
+        //const META_DIARIA = 5;
         
         const labels = [];
         const values = [];
 
         // Maior valor do período como referência (mín. 1 para evitar divisão por zero)
-        const maxCompleted = Math.max(...data.map(d => d.completed || 0), 1);
+        //const maxCompleted = Math.max(...data.map(d => d.completed || 0), 1);
         
         for (let i = daysToShow - 1; i >= 0; i--) {
             const date = new Date(today);
@@ -135,7 +139,10 @@ export default function StreakScreen({ navigation }) {
             const dayName = date.toLocaleDateString('pt-BR', { weekday: 'short' }).substring(0, 3);
             labels.push(dayName);
 
-            const percentage = ((found?.completed || 0) / maxCompleted) * 100;
+            // % em relação á meta (máx. 100%)
+            const completed = found?.completed || 0;
+            const percentage = Math.min((completed / META_DIARIA) * 100, 100);
+            //const percentage = ((found?.completed || 0) / maxCompleted) * 100;
             values.push(percentage);
         }
         
@@ -322,7 +329,7 @@ export default function StreakScreen({ navigation }) {
 
                             {/* Linha de média */}
                             <View className="flex-row justify-between mt-4 pt-4 border-t border-gray-100">
-                                <Text>Meta diária: 5 tarefas</Text>
+                                <Text>Meta diária: {META_DIARIA} tarefas</Text>
                             </View>
                         </View>
                     ) : (
