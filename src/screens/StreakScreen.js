@@ -39,7 +39,7 @@ export default function StreakScreen({ navigation }) {
     const loadData = async () => {
         try {
             const [streadRes, statsRes, historyRes] = await Promise.all([
-                api.get(`/streaks/streak?userId=${user.id}`),
+                api.get('/streaks/streak'),
                 api.get('/streaks/stats'),
                 api.get('/streaks/history')
             ]);
@@ -94,7 +94,13 @@ export default function StreakScreen({ navigation }) {
         for (let i = daysToShow - 1; i >= 0; i--) {
             const date = new Date(today);
             date.setDate(today.getDate() - i);
-            const dateStr = date.toISOString().split('T')[0];
+
+            // Formata em LOCAL, não UTC
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+
             const found = data.find(d => d.date === dateStr);
             const dayName = date.toLocaleDateString('pt-BR', { weekday: 'short' }).substring(0, 3);
             labels.push(dayName);
@@ -102,8 +108,7 @@ export default function StreakScreen({ navigation }) {
         }
 
         setChartData({
-            labels: labels,
-            datasets: [{ data: values }]
+            labels, datasets: [{ data: values }]
         });
     };
 
@@ -113,20 +118,29 @@ export default function StreakScreen({ navigation }) {
         
         const labels = [];
         const values = [];
+
+        // Maior valor do período como referência (mín. 1 para evitar divisão por zero)
+        const maxCompleted = Math.max(...data.map(d => d.completed || 0), 1);
         
         for (let i = daysToShow - 1; i >= 0; i--) {
             const date = new Date(today);
             date.setDate(today.getDate() - i);
-            const dateStr = date.toISOString().split('T')[0];
+
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+
             const found = data.find(d => d.date === dateStr);
             const dayName = date.toLocaleDateString('pt-BR', { weekday: 'short' }).substring(0, 3);
             labels.push(dayName);
-            const percentage = found?.completed ? (found.completed / (found.total || 1)) * 100 : 0;
+
+            const percentage = ((found?.completed || 0) / maxCompleted) * 100;
             values.push(percentage);
         }
         
         setTrendData({
-            labels: labels,
+            labels,
             datasets: [{ data: values }]
         });
     };
@@ -153,11 +167,6 @@ export default function StreakScreen({ navigation }) {
             return () => {}; // cleanup opcional
         }, [])
     );
-
-    
-    useEffect(() => {
-        loadData();
-    }, []);
 
     if (loading) {
             return (
